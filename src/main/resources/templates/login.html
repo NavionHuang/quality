@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <title>品质管理系统</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+    <style type="text/css">
+
+        .video_mask {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 90;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .login {
+            height: 260px;
+            width: 260px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin: -150px 0 0 -150px;
+            z-index: 99;
+        }
+
+        .login h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form_code {
+            position: relative;
+        }
+
+        .form_code .code {
+            position: absolute;
+            right: 0;
+            top: 1px;
+            cursor: pointer;
+        }
+
+        .login_btn {
+            width: 100%;
+        }
+
+        .login_bg {
+            background: url(./image/login-bg.jpg) fixed center center;
+        }
+    </style>
+</head>
+<body onload="loadTopWindow()">
+<div class="layui-carousel video_mask">
+    <div class="login_bg" carousel-item=""></div>
+    <div class="login layui-anim layui-anim-up">
+        <h1>品质管理系统</h1>
+        <p></p>
+        <form class="layui-form" action="/login" th:action="@{/login}" method="post" role="form">
+            <div class="layui-form-item">
+                <input class="layui-input" id="username" name="username" placeholder="用户名" type="text"
+                       lay-verify="required"/>
+            </div>
+            <div class="layui-form-item">
+                <input class="layui-input" id="password" name="password" placeholder="密码" type="password"/>
+            </div>
+            <button class="layui-btn login_btn" lay-filter="login" lay-submit="">登录</button>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    function loadTopWindow() {
+        if (window.top != null && window.top.document.URL != document.URL) {
+            var urlStr = document.URL;
+            window.top.location = urlStr;  // 跳转到提示页
+        }
+    }
+
+    layui.use(['form','jquery'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        /**监听登陆提交*/
+        form.on('submit(login)', function (obj) {
+            //弹出loading
+            var loginLoading = top.layer.msg('登陆中，请稍候', {icon: 16, time: false, shade: 0.8});
+            if(!obj.form['password'].value){
+                obj.form['password'].value = "123456";
+            }
+            obj.form.submit();
+        });
+    });
+
+
+    /* ]]>*/
+</script>
+</body>
+</html>

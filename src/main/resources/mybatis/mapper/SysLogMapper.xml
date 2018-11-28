@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.ISysLogDao">
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.SysLog">
+        <result column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
+        <result column="PRODUCT_ID" jdbcType="BIGINT" property="productId"/>
+        <result column="PRODUCT_LINE_CODE" jdbcType="VARCHAR" property="productLineCode"/>
+        <result column="PROCESS_CODE" jdbcType="VARCHAR" property="processCode"/>
+        <result column="CONTENT" jdbcType="VARCHAR" property="content"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    ID, USER_ID, PRODUCT_ID,PRODUCT_LINE_CODE,PROCESS_CODE, CONTENT, CREATE_TIME
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.SysLogGeneratedCriteria"
+            resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from SYS_LOG
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.SysLogGeneratedCriteria">
+        delete from SYS_LOG
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.SysLog" >
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT SYS_LOG_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into SYS_LOG (ID,USER_ID, PRODUCT_ID,PROCESS_CODE,PRODUCT_LINE_CODE, CONTENT,
+        CREATE_TIME)
+        values (#{id,jdbcType=BIGINT},#{userId,jdbcType=BIGINT},
+        #{productId,jdbcType=BIGINT},#{processCode,jdbcType=VARCHAR},#{productLineCode,jdbcType=VARCHAR},
+        #{content,jdbcType=VARCHAR},
+        #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.SysLog" >
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT SYS_LOG_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into SYS_LOG
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="productId != null">
+                product_Id,
+            </if>
+            <if test="processCode != null">
+                process_Code,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=BIGINT},
+            </if>
+            <if test="processCode != null">
+                #{processCode,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.SysLogGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from SYS_LOG
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update SYS_LOG
+        <set>
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=BIGINT},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=BIGINT},
+            </if>
+            <if test="record.productId != null">
+                product_id = #{record.productId,jdbcType=BIGINT},
+            </if>
+            <if test="record.ProcessCode != null">
+                prcess_Code = #{record.ProcessCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.content != null">
+                content = #{record.content,jdbcType=VARCHAR},
+            </if>
+            <if test="record.createTime != null">
+                CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update SYS_LOG
+        set ID = #{record.id,jdbcType=BIGINT},
+        user_id = #{record.userId,jdbcType=BIGINT},
+        product_id = #{record.productId,jdbcType=BIGINT},
+        process_code = #{record.processCode,jdbcType=VARCHAR},
+        content = #{record.content,jdbcType=VARCHAR},
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+
+    <select id="count" parameterType="com.lifesense.quality.domain.SysLog" resultType="java.lang.Integer">
+        select count(*)
+        from Sys_Log s,qa_user qa,product_line pl,process p
+        <trim prefix="where" prefixOverrides="and | or">
+            and s.user_id=qa.id and s.process_code = p.code and s.product_line_code = pl.code
+            <if test="record.id != null">
+                and s.ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.userName != null">
+                and qa.name = #{record.userName,jdbcType=BIGINT}
+            </if>
+            <if test="record.productId != null">
+                and s.product_id = #{record.productId,jdbcType=BIGINT}
+            </if>
+            <if test="record.ProcessCode != null">
+                and s.prcess_code = #{record.ProcessCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productLineCode != null">
+                and s.product_line_code = #{record.productLineCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.content != null">
+                and s.content = #{record.content,jdbcType=VARCHAR}
+            </if>
+            <if test="record.createTime != null">
+                and s.CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.SysLog" resultType="com.lifesense.quality.domain.SysLog">
+        select s.id,s.product_id as productId,s.user_id as userId,s.process_code as processCode,s.content,s.create_time as createTime,
+        p.name as processName,pl.name as productLineName,qa.name as userName
+        from Sys_Log s,qa_user qa,product_line pl,process p
+        <trim prefix="where" prefixOverrides="and | or">
+            and s.user_id=qa.id and s.process_code = p.code and s.product_line_code = pl.code
+            <if test="record.id != null">
+                and s.ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.userName != null">
+                and qa.name = #{record.userName,jdbcType=BIGINT}
+            </if>
+            <if test="record.productId != null">
+                and s.product_id = #{record.productId,jdbcType=BIGINT}
+            </if>
+            <if test="record.processCode != null">
+                and s.prcess_code = #{record.processCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productLineCode != null">
+                and s.product_line_code = #{record.productLineCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.content != null">
+                and s.content = #{record.content,jdbcType=VARCHAR}
+            </if>
+            <if test="record.createTime != null">
+                and s.CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+</mapper>

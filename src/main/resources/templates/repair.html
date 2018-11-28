@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>品质管理系统-维修工作台</title>
+    <link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <script type="text/javascript" src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+    <style>
+        body {
+            font-size: 1.2em;
+        }
+
+        .table-label {
+            padding: 8px 2px;
+            height: 38px;
+            line-height: 20px;
+            border: 1px solid #e6e6e6;
+            border-radius: 2px 0 0 2px;
+            text-align: center;
+            background-color: #FBFBFB;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .table-text {
+            padding: 8px 10px;
+            height: 38px;
+            line-height: 20px;
+            text-align: left;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .cmd_line {
+            color: #9F9F9F;
+        }
+
+        .cmd_input {
+            padding-right: 3%;
+        }
+
+        .cmd_result {
+            padding-left: 2%;
+        }
+
+        .success {
+            color: #5FB878;
+        }
+
+        .warn {
+            color: #FF5722;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+        }
+
+        .panel-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .panel-heading {
+            padding: 10px 15px;
+            border-bottom: 1px solid transparent;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+
+        .panel-body {
+            padding: 15px;
+            background-color: #ffffff;
+        }
+
+        .table {
+            text-align: left;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 5px;
+            background-color: transparent;
+            border-spacing: 0;
+            line-height: 24px;
+        }
+
+        pre ol {
+            list-style-type: disc;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-fluid" sec:authorize="hasRole('ROLE_REPAIR')">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>品质管理系统-维修工作台</legend>
+    </fieldset>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="panel panel-info">
+                <div class="panel-heading">基本信息</div>
+                <div class="panel-body">
+                    <table class="table" style="border-collapse:separate; border-spacing:0px 5px;">
+                        <tbody>
+                        <tr>
+                            <td class="table-label" style="width: 20%">工单号：</td>
+                            <td id="po" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                            <td class="table-label" style="width: 20%">产品类型：</td>
+                            <td id="productType" class="table-text"
+                                style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">线别：</td>
+                            <td id="line" class="table-text" style="background-color: #fbfbfb; color: #000;"
+                                th:text="${user.lineCode}"></td>
+                            <td class="table-label" style="width: 20%">不良代码：</td>
+                            <td id="badCode" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">作业员：</td>
+                            <td id="username" class="table-text" style="background-color: #fbfbfb; color: #000;"
+                                th:text="${user.name}"></td>
+                            <td class="table-label" style="width: 20%">不良站点：</td>
+                            <td id="processName" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">状态：</td>
+                            <td id="status" rowspan="3" class="table-text"
+                                style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr/>
+    </div>
+    <div class="layui-row" style="width: 99%">
+        <div class="layui-col-md12">
+            <div class="panel panel-info">
+                <div class="panel-heading">工作区域</div>
+                <div class="panel-body">
+                    <div>
+                        <span style="position: absolute;line-height:38px;padding: 0 5px"> &gt; </span>
+                        <input type="text" class="layui-input" style="padding-left: 20px" id="cmd" placeholder="请输入"/>
+                    </div>
+                    <pre class="layui-code" lay-title="工作日志" id="cmd_log"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_WORKER')">
+    没有权限
+</div>
+<!--维修过程-->
+<div id="repairModal" class=" layui-form-pane" style="display: none;margin-top: 15px">
+    <div>
+        <div class="layui-form-item">
+        <textarea id="badReson" name="badReson" placeholder="请简单描述维修过程"
+                  class="layui-textarea"></textarea>
+        </div>
+    </div>
+</div>
+<!--更换物料条码-->
+<div id="changeModal" class="layui-form-pane" style="display: none;margin-top: 15px;margin-left: 10px">
+    <div class="text-align">
+        <section>
+        </section>
+    </div>
+</div>
+<!--输入工站数据-->
+<div id="dataModal" class="layui-form-pane" style="display: none;margin-top: 15px;margin-left: 10px">
+    <div>
+        <div class="layui-form-item">
+        <textarea id="data_text" name="data_text" placeholder="请录入测试数据"
+                  class="layui-textarea"></textarea>
+        </div>
+    </div>
+</div>
+<!--更换物料条码 模板-->
+<div style="display: none;margin-top: 15px" id="snItemTmp">
+    <div CLASS="layui-form-item">
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input sn_input sn_old" name="oldsn" placeholder="物料原条码"/>
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input sn_input sn_new" name="newsn" placeholder="物料新条码"/>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['form', 'code', 'jquery', 'layer'], function () {
+        layui.code({about: false});
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var numLine = 1;
+        var contextPath = [[${#httpServletRequest.getContextPath()}]];
+        var product = null;
+        var newProduct = {};
+        var snchangeModal;
+        var cpsnReg = /^21\w{8}[A-Z]{2}[0-9]([1-9]|A|B|C)\d{6}$/;
+        var blsnReg = /^312[A-Z]\d{2}(0[1-9]|1[0-2])((0[1-9])|((1|2)[0-9])|30|31)\d{7}$/;
+        var bbsnReg = /^202[A-Z]\d{2}(0[1-9]|1[0-2])((0[1-9])|((1|2)[0-9])|30|31)\d{7}$/;
+        var cgqsnReg = /^411[A-Z]\d{2}(0[1-9]|1[0-2])((0[1-9])|((1|2)[0-9])|30|31)\d{2}$/;
+        var formItemId = 0;
+
+        $("#cmd").on('keyup', function (event) {
+            var that = this;
+            if (event.keyCode == 13) {
+                var text = that.value;
+                if (!!text) {
+                    //删除第一行日志，防止日志过多
+                    if ($("#cmd_log").find("li").length > 10) {
+                        var firstLi = $("#cmd_log").find("li:last-child");
+                        firstLi.remove();
+                    }
+                    var cmdText = text;
+                    $("#cmd").val('');
+                    runCmd(cmdText);
+                }
+                product = null;
+            }
+            $("#cmd").focus();
+        });
+
+        function runCmd(text) {
+        	$.ajax({
+                url: contextPath + "/repair/info",
+                type: "POST",
+                data: {"sn": text},
+                dataType: "json",
+                success: function (obj) {
+                    if (obj.code == 200) {
+                        logCmd(text, obj.msg, 0);
+                        var repairRecord = obj.data['repairRecord'];
+                        var processRecord = obj.data['processRecord'];
+                        product = obj.data['product'];
+                        product['repair_id'] = repairRecord['id'];
+                        product['text'] = text;
+                        $("#po").text(product['sheetPo']);
+                        $("#productType").text(product['productTypeCode']);
+                        $("#processName").text(obj.data['processName']);
+                        $("#badCode").text(repairRecord['badCode']);
+                        layer.closeAll();
+                        $("#badReson").val('');
+                        var repairModal = layer.open({
+                            type: 1,
+                            title: '请简单描述维修过程',
+                            content: $('#repairModal'), //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                            zIndex: layer.zIndex, //重点1
+                            area: ['500px', '300px'],
+                            btn: ['更换物料','复判OK', '提交'],
+                            success: function (layero, index) {
+                                layer.setTop(layero); //重点2
+                                $("#badReson").focus();
+                            }, cancel: function () {
+                                $("#cmd").focus();
+                                layer.closeAll()
+                                logCmd(text, '取消维修', 1);
+                                return true;
+                            }, yes: function () {
+                                newProduct = {};
+                                snchangeModal = layer.open({
+                                    type: 1,
+                                    title: '更换关键物料',
+                                    content: $('#changeModal'), //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                                    offset: 't',
+                                    area: ['500px', '300px'],
+                                    btn: ['添加', '提交'],
+                                    zIndex: 999999999, //重点1
+                                    success: function (layero1, index) {
+                                        layer.setTop(layero1); //重点2
+                                        $("#changeModal section").empty();
+                                        var formIten = $("#snItemTmp >div").clone(true);
+                                        formIten.attr('id', formItemId);
+                                        $("#changeModal section").append(formIten);
+                                        $('input:first', formIten).focus();
+                                        formItemId++;
+                                    },
+                                    cancel: function () {
+                                        $("#badReson").focus();
+                                        layer.close(snchangeModal);
+                                        $("#changeModal section").empty();
+                                        newProduct = {};
+                                        return true;
+                                    }, yes: function () {
+                                        var formIten = $("#snItemTmp >div").clone(true);
+                                        formIten.attr('id', formItemId);
+                                        $("#changeModal section").append(formIten);
+                                        formItemId++;
+                                        var inputs = $("#changeModal section input");
+                                        var lsize = inputs.length;
+                                        for (var i = 0; i < lsize; i++) {
+                                            var input = inputs[i];
+                                            if(!$(input).val()){
+                                                $(input).focus();
+                                                return
+                                            }
+                                        }
+                                    }, btn2: function () {
+                                        var inputs = $("#changeModal section input");
+                                        var lsize = inputs.length;
+                                        $("#badReson").focus();
+                                        var result = false;
+                                        for (var i = 0; i < lsize; i++) {
+                                            var input = inputs[i];
+                                            result = sn_input_fn(input);
+                                            if (!result) return result;
+                                        }
+                                        return result;
+                                    }, end: function () {
+                                        var msg = '';
+                                        var cpsn = newProduct['new_cpsn'];
+                                        var bbsn = newProduct['new_bbsn'];
+                                        var blsn = newProduct['new_blsn'];
+                                        var cgqsn = newProduct['new_cgqsn'];
+                                        if (!!blsn && blsn != product['blsn']){
+                                            msg = msg+'更换玻璃条码' + newProduct['old_blsn'] + "->" + blsn + ";\n";
+                                        }
+                                        if (!!bbsn  && bbsn != product['bbsn']){
+                                            msg = msg+'更换邦板条码' + newProduct['old_bbsn'] + "->" + bbsn + ";\n";
+                                        }
+                                        if (!!cgqsn && cgqsn != product['cgqsn']){
+                                            msg = msg+'更换传感器条码' + newProduct['old_cgqsn'] + "->" + cgqsn + ";\n";
+                                        }
+                                        if (!!cpsn && cpsn != product['cpsn']){
+                                            msg = msg+'更换产品条码' + newProduct['old_cpsn'] + "->" + cpsn + ";\n";
+                                        }
+                                        $("#badReson").val(msg);
+                                        $("#badReson").focus();
+                                    }
+                                });
+                                //复判OK
+                            }, btn2: function () { 
+                            	layer.confirm('是否确认复判OK?', {btn: ['确定', '取消']},
+                                        function (index, layero) {
+                            				$("#badReson").val("复判OK");
+                                			submitForm();
+                                    		return true;
+                                        }, function (index) {
+                                        	$("#cmd").focus();
+                                            layer.closeAll()
+                                            logCmd(text, '取消维修', 1);
+                                        	return true;
+                                        }); 
+                            }, btn3: function () {
+                                var badReson = $("#badReson").val();
+                                if (!badReson) {
+                                    layer.tips('请填写维修过程', "#badReson");
+                                    $("#badReson").focus();
+                                    return false;
+                                } else {
+                                    submitForm();
+                                    return true;
+                                }
+                            }
+                        });
+                    } else if (obj.code == -1) {
+                        logCmd(text, obj.msg, 1);
+                    }
+                },
+                error: function (error) {
+                    layer.closeAll();
+                    layer.msg("系统错误");
+                }
+            });
+        }
+
+        function logCmd(text, result, type) {
+            var div = '';
+            $("#status").empty();
+            if (type == 0) {
+                $("#status").append('<span class="cmd_status success">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result success">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            } else if (type == 1) {
+                $("#status").append('<span class="cmd_status warn">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result warn">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            } else {
+                $("#status").append('<span class="cmd_status error">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result error">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            }
+            numLine = numLine + 1;
+            var first = $("#cmd_log").find("li:first-child");
+            var span = first.find("div");
+            if (span.length == 0) {
+                first.prepend(div);
+            } else {
+                var li = '<li>' + div + '</li>'
+                $("#cmd_log").find("ol").prepend(li);
+            }
+        }
+
+        $("#badReson").on('keyup', function (event) {
+            var that = this;
+            if (event.keyCode == 13) {
+                var text = that.value;
+                text = text.replace(/\ +/g, "");
+                text = text.trim();
+                if (!!text) {
+                    submitForm();
+                }
+            }
+        });
+
+
+        $("#changeModal").on("keyup", function (e) {
+            var keyCode = e.keyCode;
+            if (keyCode === 13) {
+                var that = this;
+                var _this = e.target;
+                sn_input_fn(_this);
+            }
+        });
+
+        function sn_input_fn(_this){
+            var result = false;
+            if ($(_this).hasClass('sn_old')) {
+                //原
+                var text = $(_this).val();
+                if (!!text) {
+                    if (product['cpsn'] == text || product['blsn'] == text || product['bbsn'] == text|| product['cgqsn'] == text) {
+                        var snNew = $('input:eq(1)', $(_this).parent().parent());
+                        snNew.focus();
+                        result =  true;
+                    } else {
+                        layer.tips('原物料条码错误', "#changeModal");
+                        $(_this).val('');
+                        $(_this).focus();
+                        result =  false;
+                    }
+                } else {
+                    $(_this).val('');
+                    $(_this).focus();
+                    layer.tips('请输入原物料条码', "#changeModal");
+                    result =  false;
+                }
+            } else if ($(_this).hasClass('sn_new')) {
+                //新
+                var text = $(_this).val();
+                if (!!text) {
+                    var _parent = $(_this).parent().parent();
+                    var snOld = $('input:eq(0)', _parent);
+                    var sn = snOld.val();
+                    if (product['cpsn'] == sn) {
+                        //产品编码
+                        if (cpsnReg.test(text)) {
+                            newProduct['old_cpsn'] = sn;
+                            newProduct['new_cpsn'] = text;
+                            result =  true;
+                        } else {
+                            layer.tips('新物料条码错误，不是产品条码', "#changeModal");
+                            $(_this).val('');
+                            $(_this).focus();
+                            result =  false;
+                        }
+                    } else if (product['blsn'] == sn) {
+                        //玻璃编码
+                        if (blsnReg.test(text)) {
+                            newProduct['old_blsn'] = sn;
+                            newProduct['new_blsn'] = text;
+                            result =  true;
+                        } else {
+                            layer.tips('新物料条码错误，不是玻璃条码', "#changeModal");
+                            $(_this).val('');
+                            $(_this).focus();
+                            result =  false;
+                        }
+                    } else if (product['bbsn'] == sn) {
+                        //邦板编码
+                        if (bbsnReg.test(text)) {
+                            newProduct['old_bbsn'] = sn;
+                            newProduct['new_bbsn'] = text;
+                            result =  true;
+                        } else {
+                            layer.tips('新物料条码错误，不是邦板条码', "#changeModal");
+                            $(_this).val('');
+                            $(_this).focus();
+                            result =  false;
+                        }
+                    }else if (product['cgqsn'] == sn) {
+                        //邦板编码
+                        if (cgqsnReg.test(text)) {
+                            newProduct['old_cgqsn'] = sn;
+                            newProduct['new_cgqsn'] = text;
+                            result =  true;
+                        } else {
+                            layer.tips('新物料条码错误，不是传感器条码', "#changeModal");
+                            $(_this).val('');
+                            $(_this).focus();
+                            result =  false;
+                        }
+                    } else {
+                        layer.tips('新物料条码错误，不是关键物料[玻璃,邦板,传感器,产品]条码', "#changeModal");
+                        $(_this).val('');
+                        $(_this).focus();
+                        result =  false;
+                    }
+                    if (!!$(_this).val()) {
+                        //有新sn，判断是否属于最后一个新sn
+                        var last = $("#changeModal div.layui-form-item:last");
+                        var id = last.attr('id');
+                        var _pid = _parent.attr('id');
+                        if (id == _pid) {
+                            layer.close(snchangeModal);
+                            result =  true;
+                        }else{
+                            var inputs = $("#changeModal section input");
+                            var lsize = inputs.length;
+                            for (var i = 0; i < lsize; i++) {
+                                var input = inputs[i];
+                                if(!$(input).val()){
+                                    $(input).focus();
+                                    result =  false;
+                                    return result;
+                                }
+                            }
+
+                        }
+                    }
+                } else {
+                    $(_this).val('');
+                    $(_this).focus();
+                    result =  false;
+                }
+            }
+            /*var inputs = $("#changeModal section input");
+            inputs.each(function (i) {
+                if (!$(this).val()) {
+                    $(this).focus();
+                    result =  false;
+                }
+            });*/
+            return result;
+        }
+
+        function submitForm() {
+            var badReson = $("#badReson").val();
+            var repair_id = product['repair_id'];
+            var text = product['text'];
+            var cpsn = newProduct['new_cpsn'];
+            var bbsn = newProduct['new_bbsn'];
+            var blsn = newProduct['new_blsn'];
+            var cgqsn = newProduct['new_cgqsn'];
+            var data = {};
+            data['id'] = repair_id;
+            data['badType'] = 1;
+            data['badReson'] = badReson.replace(/\ +/g, "");
+            data['cpsn'] = cpsn;
+            data['bbsn'] = bbsn;
+            data['blsn'] = blsn;
+            data['cgqsn'] = cgqsn;
+            layer.closeAll();
+            var index = layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+            $.ajax({
+                url: /*[[@{/repair/save}]]*/ null,
+                type: 'post',
+                data: data,
+                dataType: 'json',
+                success: function (res) {
+                    layer.close(index);
+                    $("#cmd").focus();
+                    if (res.code != 200) {
+                        logCmd(text, res.msg, 1);
+                    } else {
+                        logCmd(text, res.msg, 0);
+                        /*if ("T06" == res.data) {
+                            layer.confirm('是否录入['+ res.data+']测试数据?', {btn: ['确定', '取消']},
+                                function (index, layero) {
+                                    logCmd(text, '开始录入' + res.data + '测试数据', 0);
+                                    layer.close(index);
+                                    openNext(res.data);
+                                }, function (index) {
+                                    layer.closeAll(); //再执行关闭
+                                });
+                        }*/
+                    }
+                },
+                error: function (e, m) {
+                    layer.close(index);
+                    layer.msg('数据提交异常', {time: 3000});
+                    $("#cmd").focus();
+                }
+            });
+            newProduct = {};
+            $("#badReson").val('');
+        }
+
+		
+        $("#data_text").on('keyup', function (event) {
+            var that = this;
+            if (event.keyCode == 13) {
+                var text = that.value;
+                text = text.replace(/\ +/g, "");
+                if (!!text) {
+                    submitNext();
+                }
+            }
+        });
+		
+        function openNext(code) {
+            var text = product['text'];
+            layer.open({
+                type: 1,
+                title: '录入工站['+code+']测试数据数据',
+                content: $('#dataModal'), //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                zIndex: layer.zIndex, //重点1
+                area: ['500px', '300px'],
+                btn: ['提交', '取消'],
+                success: function (layero, index) {
+                    layer.setTop(layero); //重点2
+                    $("#data_text").val('');
+                    $("#data_text").focus();
+                }, cancel: function () {
+                    $("#cmd").focus();
+                    layer.closeAll();
+                    logCmd(text, '取消录入测试数据', 1);
+                    return true;
+                },yes:function () {
+                    submitNext();
+                },btn2:function () {
+                    $("#cmd").focus();
+                    layer.closeAll();
+                    logCmd(text, '取消录入测试数据', 1);
+                    return true;
+                }
+            });
+        }
+
+        function submitNext() {
+            var text = product['text'];
+            layer.closeAll();
+            var index = layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+            var json = $("#data_text").val();
+            var data = {};
+            data['productId'] = product['id'];
+            data['json'] = json.replace(/\ +/g, "");
+            $.ajax({
+                url: /*[[@{/repair/nextSave}]]*/ null,
+                type: 'post',
+                data: data,
+                dataType: 'json',
+                success: function (res) {
+                    layer.close(index);
+                    $("#cmd").focus();
+                    if (res.code != 200) {
+                        logCmd(text, res.msg, 1);
+                    } else {
+                        logCmd(text, res.msg, 0);
+                        if ("T06" == res.data ||"T07" == res.data||"T08" == res.data||"T09" == res.data) {
+                            layer.confirm('是否录入['+ res.data+']测试数据?', {btn: ['确定', '取消']},
+                                function (index, layero) {
+                                    logCmd(text, '开始录入' + res.data + '测试数据', 0);
+                                    layer.close(index);
+                                    openNext(res.data);
+                                }, function (index) {
+                                    layer.closeAll(); //再执行关闭
+                                    $("#cmd").focus();
+                                });
+                        }
+                    }
+                },
+                error: function (e, m) {
+                    layer.close(index);
+                    layer.msg('数据提交异常', {time: 3000});
+                    $("#cmd").focus();
+                }
+            });
+        }
+		
+        $("#cmd").focus();
+
+        function checkLogin() {
+            $.ajax({
+                url: contextPath+'/checkLogin',
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    //10分钟请求一次，重新回调
+                    //setTimeout(checkLogin, 600000);
+                }
+            });
+        }
+
+        //10分钟请求一次，
+        //setTimeout(checkLogin, 600000);
+
+        setInterval(checkLogin, 600000);
+
+
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

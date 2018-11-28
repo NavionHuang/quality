@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统-新增用户</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<div>
+    <div class="layui-container" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+        <div class="layui-row">
+            <form class="layui-form  layui-form-pane" th:object="${user}" lay-filter="form">
+                <input type="hidden" name="id" th:value="*{id}"/>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">工号</label>
+                    <div class="layui-input-block">
+                        <span name="code" th:text="*{code}" class="layui-input"></span>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" lay-verify="required" placeholder="请输入姓名"
+                               class="layui-input" th:value="*{name}"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="processSign" th:value="0" title="作业员" th:checked="*{processSign} == 0"
+                               lay-filter="noProcessSign" sec:authorize="hasAnyRole('ROLE_SUPPER','ROLE_MANAGER')"/>
+                        <input type="radio" name="processSign" th:value="1" title="管理员" th:checked="*{processSign} == 1"
+                               sec:authorize="hasRole('ROLE_SUPPER')"
+                               lay-filter="noProcessSign"/>
+                        <input type="radio" name="processSign" th:value="3" title="拉长" lay-filter="noProcessSign" th:checked="*{processSign} == 3"
+                               sec:authorize="hasAnyRole('ROLE_SUPPER','ROLE_ADMIN')"/>
+                        <input type="radio" name="processSign" th:value="2" title="维修员" th:checked="*{processSign} == 2"
+                               lay-filter="noProcessSign" sec:authorize="hasAnyRole('ROLE_SUPPER','ROLE_MANAGER')"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">线别</label>
+                    <div class="layui-input-block" id="lineCodeView">
+                        <select name="lineCode">
+                            <option th:each="line:${lines}" th:value="${line.code}" th:text="${line.name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="processSelect">
+                    <label class="layui-form-label">站别</label>
+                    <div class="layui-input-block" id="processCodeView">
+                        <select name="processCode">
+                            <option value=""></option>
+                            <th:block th:if="*{processSign} == 0">
+                                <option th:each="process:${processList}" th:value="${process.code}"
+                                        th:text="${process.name}"
+                                        th:selected="${process.code} eq *{processCode}"></option>
+                            </th:block>
+                            <th:block th:if="*{processSign} == 2">
+                                <option th:each="process:${repairProcessList}" th:value="${process.code}"
+                                        th:text="${process.name}"
+                                        th:selected="${process.code} eq *{processCode}"></option>
+                            </th:block>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否有效</label>
+                    <div class="layui-input-block">
+                        <input name="valid" title="有效" type="radio" checked="" value="0" th:checked="*{valid} == 0"/>
+                        <input name="valid" title="无效" type="radio" checked="" value="1" th:checked="*{valid} == 1"/>
+                    </div>
+                </div>
+                <div class="layui-form-item" style="text-align: center;">
+                    <button class="layui-btn" lay-submit="" lay-filter="submitBtn">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script id="processCode" type="text/html">
+    <select name="processCode">
+        <option value=""></option>
+        {{# layui.each(d.list, function(index, item){ if(item.code==d.pcode){ }}
+        <option value="{{item.code}}" selected="selected">{{item.name}}</option>
+        {{# }else{ }}
+        <option value="{{item.code}}">{{item.name}}</option>
+        {{# } }); }}
+    </select>
+</script>
+
+<script id="lineCode" type="text/html">
+    <select name="lineCode">
+        <option value=""></option>
+        {{# layui.each(d.list, function(index, item){
+         if(item.code==d.lCode){ }}
+        <option value="{{item.code}}" selected="selected">{{item.name}}</option>
+        {{# }else{ }}
+        <option value="{{item.code}}">{{item.name}}</option>
+        {{# } }); }}
+    </select>
+</script>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    layui.config({
+        base: "../js/"
+    }).use(['form', 'common', 'laytpl','jquery'], function () {
+        var form = layui.form;
+        var common = layui.common;
+        var laytpl = layui.laytpl;
+        var $ = layui.jquery;
+        var processes = /*[[${processList}]]*/null;
+        var lines = /*[[${lines}]]*/null;
+        var lCode = /*[[${user.lineCode}]]*/null;
+        var pcode = /*[[${user.processCode}]]*/null;
+        var processCodeTpl = processCode.innerHTML
+            , processCodeView = document.getElementById('processCodeView');
+        var lineCodeTpl = lineCode.innerHTML
+            , lineCodeView = document.getElementById('lineCodeView');
+
+        function noProcessSign(obj) {
+            var data = {};
+            if (obj == 0) {//操作员
+                data.list = processes;
+                data.pcode = pcode;
+            } else {
+                data.list = [];
+            }
+            laytpl(processCodeTpl).render(data, function (html) {
+                processCodeView.innerHTML = html;
+            });
+            if (obj == 1) {//管理员，没有产线
+                data.list = [];
+            } else {
+                data.list = lines;
+                data.lCode = lCode;
+            }
+            laytpl(lineCodeTpl).render(data, function (html) {
+                lineCodeView.innerHTML = html;
+            });
+            form.render("select");
+        }
+
+        form.on('radio(noProcessSign)',function (obj) {
+            noProcessSign(obj.value);
+        });
+
+        var obj = $('input:radio[name=processSign]:checked').val();
+        noProcessSign(obj);
+
+        //监听提交
+        form.on('submit(submitBtn)', function (obj) {
+            //弹出loading
+            common.ajaxCommit("../user/save", obj.field);
+            return false;
+        });
+
+    });
+    /* ]]>*/
+</script>
+</body>
+</html>

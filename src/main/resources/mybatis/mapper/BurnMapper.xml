@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.BurnDao">
+	<resultMap type="com.lifesense.quality.domain.Burn"
+		id="result">
+		<id column="ID" property="id" />
+		<result column="SN" property="sn" />
+		<result column="NAME" property="name" />
+		<result column="VERSION" property="version" />
+		<result column="MAC" property="mac" />
+		<result column="PO" property="po" />
+		<result column="CREATE_TIME" property="createTime" />
+		<result column="REMARK" property="remark" />
+		<result column="PRODUCT_ID" property="productId" />
+	</resultMap>
+	<insert id="inser"
+		parameterType="com.lifesense.quality.domain.Burn">
+		insert /*+IGNORE_ROW_ON_DUPKEY_INDEX(BURN(SN)) */ into
+		BURN
+		(SN,NAME,VERSION,MAC,CREATE_TIME)
+		VALUES(#{sn},#{name},#{version},#{mac},#{createTime})
+	</insert>
+	<update id="update"
+		parameterType="com.lifesense.quality.domain.Burn">
+		update BURN
+		SET
+			<choose>
+				<when test="po==null">
+					PO=NULL,
+				</when>
+				<otherwise>
+					PO=#{po},
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="productId==null">
+					PRODUCT_ID=NULL
+				</when>
+				<otherwise>
+					PRODUCT_ID=#{productId}
+				</otherwise>
+			</choose>
+		where SN=#{sn}
+	</update>
+	<select id="queryBySN" parameterType="String" resultMap="result">
+		select *
+		from BURN where SN=#{sn}
+	</select>
+	<select id="query" resultMap="result">
+		select * from BURN
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="burn.sn!=null and burn.sn!=''"> SN=#{burn.sn}</if>
+			<if test="burn.name!=null and burn.name!=''">and NAME=#{burn.name}</if>
+			<if test="burn.version!=null and burn.version!=''">and VERSION=#{burn.version}</if>
+			<if test="burn.po!=null and burn.po!=''">and PO=#{burn.po}</if>
+			<if test="burn.mac!=null and burn.mac!=''">and MAC=#{burn.mac}</if>
+			<if test="burn.productId!=null">and PRODUCT_ID=#{burn.productId}</if>
+			<if test="startTime!=null">and CREATE_TIME &gt;= #{startTime,jdbcType=VARCHAR}</if>
+			<if test="endTime!=null">and CREATE_TIME &lt;= #{endTime,jdbcType=VARCHAR}</if>
+		</trim>
+		ORDER BY CREATE_TIME DESC
+	</select>
+	<!-- 重复烧录 -->
+	<update id="reBurn" parameterType="com.lifesense.quality.domain.Burn">
+		UPDATE BURN SET	NAME=#{name},VERSION=#{version},MAC=#{mac},CREATE_TIME=#{createTime} WHERE SN=#{sn}
+	</update>
+</mapper>

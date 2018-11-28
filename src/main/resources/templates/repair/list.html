@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统-用户列表</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_REPAIR')">
+    <div class="layui-row">
+        <!--头部查询form-->
+        <div class="search">
+            <div class="layui-form layui-form-pane" lay-filter="searchForm">
+                <div class="layui-inline" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+                    <label class="layui-form-label">线别</label>
+                    <div class="layui-input-inline">
+                        <select  name="productLine">
+                            <option value="">请选择线别</option>
+                            <option th:each="line:${lines}" th:value="${line.code}" th:text="${line.name}">线别
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">站别</label>
+                    <div class="layui-input-inline">
+                        <select  name="processCode">
+                            <option value="">请选择站别</option>
+                            <option th:each="process:${processes}" th:value="${process.code}" th:text="${process.name}">站别
+                            </option>
+                        </select>
+                    </div>
+                </div>
+<!--                <div class="layui-inline">
+                    <label class="layui-form-label">不良代码</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入不良代码" name="badCode"/>
+                    </div>
+                </div>-->
+                <div class="layui-inline">
+                    <label class="layui-form-label">玻璃SN</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入玻璃SN" name="blsn"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">产品SN</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入产品SN" name="cpsn"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">维修状态</label>
+                    <div class="layui-input-inline">
+                        <select  name="repair">
+                            <option value="-1">未维修</option>
+                            <option value="0">已维修</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-btn-container">
+                        <button class="layui-btn" lay-submit="" lay-filter="searchBtn" id="searchBtn"><i
+                                class="layui-icon">&#xe615;</i>查询
+                        </button>
+                        <!--
+                       <button class="layui-btn" id="editBtn"><i
+                               class="layui-icon">&#xe642;</i>维修
+                       </button>
+
+                       <button class="layui-btn" id="batchEditBtn"><i
+                               class="layui-icon">&#xe642;</i>批量维修
+                       </button>
+                       -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--中间表格内容-->
+        <div>
+            <table id="dataTable" lay-filter="dataTable"></table>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="layui-form layui-form-pane" id="batchEditDiv" style="display: none;margin-top: 15px"
+         lay-filter="repairForm">
+        <div class="layui-bg-orange">批量操作，所有产品返回源工站</div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">不良类型</label>
+            <div class="layui-input-block">
+                <select id="badType" name="badType">
+                    <option value="">请选择不良类型</option>
+                    <option value="1">外观不良</option>
+                    <option value="2">来料不良</option>
+                    <option value="3">作业不良</option>
+                    <option value="4">其他</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">不良原因</label>
+            <div class="layui-input-block">
+                    <textarea id="badReson" name="badReson" required="required" lay-verify="required"
+                              placeholder="请输入备注"
+                              class="layui-textarea"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'table', 'laypage', 'common', 'jquery', 'layer'], function () {
+        var form = layui.form;
+        var table = layui.table;
+        var common = layui.common;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        var tableIns = table.render({
+            id: "dataTable",
+            elem: '#dataTable', //绑定对象
+            size: 'sm',
+            loading: true,
+            page: true,
+            limit: 10,
+            url: /*[[@{/repair/list_data}]]*/ null,//请求地址，默认会绑定参数?page=1&limit=30，分别代表当前页码和呈现的数据量
+            method: 'post',
+            where:{'repair':-1},
+            cols: [[ //标题栏
+                {type: 'checkbox'}
+                , {type:'numbers', title: '序号'}
+               /* , {field: 'repairProcessName', title: '维修站'}*/
+                , {field: 'blsn', title: '玻璃SN'}
+                , {field: 'cpsn', title: '产品SN'}
+                , {field: 'productLineName', title: '线别'}
+                , {field: 'processName', title: '站别'}
+                , {field: 'badCode', title: '不良代码'}
+                , {
+                    title: '维修状态',
+                    templet: '<div>{{# if(d.repair ==-1){ }} 未维修 {{# } else { }} 已维修{{#  } }}</div>'
+                }
+                , {field: 'userName', title: '维修人'}
+                , {field: 'badReson', title: '维修过程', width: '15%'}
+                , {field: 'modifyTime', title: '维修时间'}
+                /*, {
+                    title: '操作',
+                    width: 80,
+                    toolbar: '<div>{{# if(d.repair == 0){ }}<button class="layui-btn layui-btn-mini" lay-event="edit">维修</button>{{#  } }}</div>',
+                    fixed: 'right'
+                }*/
+            ]],
+            response: {
+                statusName: 'code' //数据状态的字段名称，默认：code
+                , statusCode: 200 //成功的状态码，默认：0
+                , msgName: 'msg' //状态信息的字段名称，默认：msg
+                , countName: 'count' //数据总数的字段名称，默认：count
+                , dataName: 'data' //数据列表的字段名称，默认：data
+            }
+        });
+
+        //监听工具条
+        table.on('tool(dataTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'edit') { //编辑
+                var url = /*[[@{/repair/edit.html?id=}]]*/ null;
+                url = url + data.id;
+                common.layOpen("维修产品", url, "600px", "400px", false);
+            }
+        });
+
+        form.on("submit(searchBtn)", function (obj) {
+            var field = obj.field;
+            if (!field['cpsn']) field['cpsn'] = undefined;
+            if (!field['blsn']) field['blsn'] = undefined;
+           if (!field['productLine']) field['productLine'] = undefined;
+            if (!field['processCode']) field['processCode'] = undefined;
+            /*if (!field['repairProcessCode']) field['repairProcessCode'] = undefined;*/
+            if (!field['repair']) field['repair'] = -1;
+            tableIns.reload({
+                where: field
+            })
+        });
+
+
+        //更换SN
+        $("#editBtn").on('click', function () {
+            var checkStatus = table.checkStatus('dataTable'); //dataTable即为参数id设定的值
+            if (checkStatus.data.length > 1 || checkStatus.data.length == 0) {
+                top.layer.msg('请选择一行数据');
+            } else {
+                var data = checkStatus.data[0];
+                if (data.valid == 0) {
+                    common.layErrorMsg("产品正常，维修");
+                } else {
+                    var url = /*[[@{/repair/edit.html?id=}]]*/null;
+                    url = url + data.id;
+                    common.layOpen("维修产品", url, "600px", "400px", true);
+                }
+            }
+        });
+
+        $("#batchEditBtn").on('click', function () {
+            var checkStatus = table.checkStatus('dataTable'); //dataTable即为参数id设定的值
+            if (checkStatus.data.length == 0) {
+                top.layer.msg('请选择数据');
+            } else {
+                var data = checkStatus.data;
+                var index = layer.open({
+                    type: 1,
+                    title: '<i class="larry-icon larry-bianji3"></i>维修',
+                    skin: 'layui-layer-molv',
+                    area: ['400px', '600px'],
+                    btnAlign: 'c',
+                    content: $('#batchEditDiv'),
+                    btn: ['确定', '取消'],
+                    success: function (layero, index) {
+                        form.render(null, 'repairForm');
+                    }
+                    , yes: function (index, layero) {
+                        var badType = $("#badType").val();
+                        var badReson = $("#badReson").val();
+                        if (!badType) {
+                            layer.msg("请选择不良类型");
+                            return false;
+                        }
+                        if (!badReson) {
+                            layer.msg("请填写不良原因");
+                            return false;
+                        }
+                        var ids = [];
+                        $.each(data, function (i, item) {
+                            ids.push(item.id);
+                        });
+                        if (ids.length == 0) {
+                            layer.msg("请选择维修数据");
+                            return false;
+                        }
+                        var field = {ids: ids, badType: badType, badReson: badReson};
+                        var msg = layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+                        $.ajax({
+                            url: /*[[@{/repair/batchSave}]]*/null,
+                            type: 'post',
+                            data: field,
+                            dataType: 'json',
+                            success: function (res) {
+                                layer.close(msg);
+                                if (res.code != 200) {
+                                    layer.msg(res.msg);
+                                } else {
+                                    //刷新父页面
+                                    location.reload();
+                                }
+                            },
+                            error: function (e, m) {
+                                layer.close(msg);
+                                layer.msg('数据提交异常');
+                            }
+                        });
+                    }
+                    , btn2: function (index, layero) {
+
+                    }
+                });
+                layer.full(index);
+            }
+        });
+
+        $(document).on("keyup", function (e) {
+            var keyCode = e.keyCode;
+            if (keyCode === 13) {
+                $("#searchBtn").trigger("click");
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

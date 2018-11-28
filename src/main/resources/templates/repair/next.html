@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统- 产品维修</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<div class="layui-container" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_REPAIR')">
+    <div class="layui-row">
+        <div class="layui-form layui-form-pane">
+            <input type="hidden" name="productId" th:value="${product.id}"/>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">工单号</label>
+                    <div class="layui-input-inline">
+                        <span class="layui-input" th:text="${product.sheetPo}"></span>
+                    </div>
+                    <label class="layui-form-label">线别</label>
+                    <div class="layui-input-inline">
+                        <span class="layui-input" th:text="${productLine.name}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">工站</label>
+                    <div class="layui-input-inline">
+                        <span class="layui-input" th:text="${process.name}"></span>
+                    </div>
+                    <label class="layui-form-label" th:if="${process.code} eq 'T04'">玻璃SN</label>
+                    <label class="layui-form-label" th:unless="${process.code} eq 'T04'">产品SN</label>
+                    <div class="layui-input-inline">
+                        <span class="layui-input" th:text="${(product.cpsn)?:product.blsn}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" th:unless="${product.cpsn}">
+                <label class="layui-form-label">产品SN</label>
+                <div class="layui-input-block">
+                    <input name="sn" placeholder="请输入产品SN"
+                           class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">测试数据</label>
+                <div class="layui-input-block">
+                    <textarea name="json" placeholder="请输入测试数据"
+                              class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item" style="text-align: center;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="submitBtn">录入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'common','jquery'], function () {
+        var form = layui.form;
+        var common = layui.common;
+        var $ = layui.jquery;
+
+        //监听提交
+        form.on('submit(submitBtn)', function (obj) {
+            //弹出loading
+            var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+            var field = obj.field;
+            var nextUrl = /*[[@{/repair/next.html?productId=}]]*/"";
+            nextUrl = nextUrl + field.productId;
+            $.ajax({
+                url: /*[[@{/repair/nextSave}]]*/ null,
+                type: 'post',
+                data:  field,
+                dataType: 'json',
+                success: function (res) {
+                    top.layer.close(index);
+                    if (res.code != 200) {
+                        top.layer.msg(res.msg);
+                    } else {
+                        layer.confirm('是否录入下一站工站OK数据?',{btn: ['确定','取消']},function(index, layero) {
+                            location.href = nextUrl;
+                        },function (index) {
+                            layer.closeAll("iframe"); //再执行关闭                        //刷新父页面
+                            parent.location.reload();
+                        });
+
+                    }
+                },
+                error: function (e, m) {
+                    top.layer.close(index);
+                    top.layer.msg('数据提交异常',{time: 3000});
+                }
+            });
+            return false;
+        });
+
+    });
+    /* ]]>*/
+</script>
+</body>
+</html>

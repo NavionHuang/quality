@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IRepairRecordDao">
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.RepairRecord">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="process_record_ID" jdbcType="BIGINT" property="processRecordId"/>
+        <result column="product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="BAD_CODE" jdbcType="VARCHAR" property="badCode"/>
+        <result column="BAD_NAME" jdbcType="VARCHAR" property="badName"/>
+        <result column="BAD_TYPE" jdbcType="VARCHAR" property="badType"/>
+        <result column="BAD_RESON" jdbcType="VARCHAR" property="badReson"/>
+        <result column="REPAIR" jdbcType="BIGINT" property="repair"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    ID, process_record_ID, product_id, BAD_CODE, BAD_NAME, BAD_TYPE, BAD_RESON, REPAIR, 
+    user_id, CREATE_TIME, MODIFY_TIME, remark
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.RepairRecordGeneratedCriteria"
+            resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from REPAIR_RECORD
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from REPAIR_RECORD
+        where ID = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+    delete from REPAIR_RECORD
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.RepairRecordGeneratedCriteria">
+        delete from REPAIR_RECORD
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.RepairRecord">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            select REPAIR_RECORD_SEQ.nextval as Id from dual
+        </selectKey>
+        insert into REPAIR_RECORD (id,process_record_ID, product_id, BAD_CODE,REPAIR_PROCESS_CODE,
+        BAD_NAME, BAD_TYPE, BAD_RESON,
+        REPAIR, user_id, CREATE_TIME,
+        MODIFY_TIME, remark)
+        values (#{id,jdbcType=BIGINT},#{processRecordId,jdbcType=BIGINT}, #{productId,jdbcType=VARCHAR}, #{badCode,jdbcType=VARCHAR},#{repairProcessCode,jdbcType=VARCHAR},
+        #{badName,jdbcType=VARCHAR}, #{badType,jdbcType=VARCHAR}, #{badReson,jdbcType=VARCHAR},
+        #{repair,jdbcType=BIGINT}, #{userId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+        #{modifyTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.RepairRecord">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            select REPAIR_RECORD_SEQ.nextval as Id from dual
+        </selectKey>
+        insert into REPAIR_RECORD
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="processRecordId != null">
+                process_record_ID,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="badCode != null">
+                BAD_CODE,
+            </if>
+            <if test="badName != null">
+                BAD_NAME,
+            </if>
+            <if test="badType != null">
+                BAD_TYPE,
+            </if>
+            <if test="badReson != null">
+                BAD_RESON,
+            </if>
+            <if test="repair != null">
+                REPAIR,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="processRecordId != null">
+                #{processRecordId,jdbcType=BIGINT},
+            </if>
+            <if test="productId != null">
+                #{productId,jdbcType=VARCHAR},
+            </if>
+            <if test="badCode != null">
+                #{badCode,jdbcType=VARCHAR},
+            </if>
+            <if test="badName != null">
+                #{badName,jdbcType=VARCHAR},
+            </if>
+            <if test="badType != null">
+                #{badType,jdbcType=VARCHAR},
+            </if>
+            <if test="badReson != null">
+                #{badReson,jdbcType=VARCHAR},
+            </if>
+            <if test="repair != null">
+                #{repair,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.RepairRecordGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from REPAIR_RECORD
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update REPAIR_RECORD
+        <set>
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=BIGINT},
+            </if>
+            <if test="record.processRecordId != null">
+                process_record_ID = #{record.processRecordId,jdbcType=BIGINT},
+            </if>
+            <if test="record.productId != null">
+                product_id = #{record.productId,jdbcType=VARCHAR},
+            </if>
+            <if test="record.badCode != null">
+                BAD_CODE = #{record.badCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.badName != null">
+                BAD_NAME = #{record.badName,jdbcType=VARCHAR},
+            </if>
+            <if test="record.badType != null">
+                BAD_TYPE = #{record.badType,jdbcType=VARCHAR},
+            </if>
+            <if test="record.badReson != null">
+                BAD_RESON = #{record.badReson,jdbcType=VARCHAR},
+            </if>
+            <if test="record.repair != null">
+                REPAIR = #{record.repair,jdbcType=BIGINT},
+            </if>
+            <if test="record.userId != null">
+                user_id = #{record.userId,jdbcType=VARCHAR},
+            </if>
+            <if test="record.createTime != null">
+                CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.modifyTime != null">
+                MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.remark != null">
+                remark = #{record.remark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update REPAIR_RECORD
+        set ID = #{record.id,jdbcType=BIGINT},
+        process_record_ID = #{record.processRecordId,jdbcType=BIGINT},
+        product_id = #{record.productId,jdbcType=VARCHAR},
+        BAD_CODE = #{record.badCode,jdbcType=VARCHAR},
+        BAD_NAME = #{record.badName,jdbcType=VARCHAR},
+        BAD_TYPE = #{record.badType,jdbcType=VARCHAR},
+        BAD_RESON = #{record.badReson,jdbcType=VARCHAR},
+        REPAIR = #{record.repair,jdbcType=BIGINT},
+        user_id = #{record.userId,jdbcType=VARCHAR},
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+        MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP},
+        remark = #{record.remark,jdbcType=VARCHAR}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lifesense.quality.domain.RepairRecord">
+        update REPAIR_RECORD
+        <set>
+            <if test="processRecordId != null">
+                process_record_ID = #{processRecordId,jdbcType=BIGINT},
+            </if>
+            <if test="productId != null">
+                product_id = #{productId,jdbcType=VARCHAR},
+            </if>
+            <if test="badCode != null">
+                BAD_CODE = #{badCode,jdbcType=VARCHAR},
+            </if>
+            <if test="badName != null">
+                BAD_NAME = #{badName,jdbcType=VARCHAR},
+            </if>
+            <if test="badType != null">
+                BAD_TYPE = #{badType,jdbcType=VARCHAR},
+            </if>
+            <if test="badReson != null">
+                BAD_RESON = #{badReson,jdbcType=VARCHAR},
+            </if>
+            <if test="repair != null">
+                REPAIR = #{repair,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lifesense.quality.domain.RepairRecord">
+    update REPAIR_RECORD
+    set process_record_ID = #{processRecordId,jdbcType=BIGINT},
+      product_id = #{productId,jdbcType=VARCHAR},
+      BAD_CODE = #{badCode,jdbcType=VARCHAR},
+      BAD_NAME = #{badName,jdbcType=VARCHAR},
+      BAD_TYPE = #{badType,jdbcType=VARCHAR},
+      BAD_RESON = #{badReson,jdbcType=VARCHAR},
+      REPAIR = #{repair,jdbcType=BIGINT},
+      user_id = #{userId,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+    <select id="count" parameterType="com.lifesense.quality.domain.RepairRecord" resultType="java.lang.Integer">
+        select count(*)
+        from Repair_Record
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.processRecordId != null">
+                and process_record_ID = #{record.processRecordId,jdbcType=BIGINT}
+            </if>
+            <if test="record.productId != null">
+                and product_id = #{record.productId,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badCode != null">
+                and BAD_CODE = #{record.badCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badName != null">
+                and BAD_NAME = #{record.badName,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badType != null">
+                and BAD_TYPE = #{record.badType,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badReson != null">
+                and BAD_RESON = #{record.badReson,jdbcType=VARCHAR}
+            </if>
+            <if test="record.repair != null">
+                and REPAIR = #{record.repair,jdbcType=BIGINT}
+            </if>
+            <if test="record.userId != null">
+                and user_id = #{record.userId,jdbcType=VARCHAR}
+            </if>
+            <if test="record.createTime != null">
+                and CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.modifyTime != null">
+                and MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.remark != null">
+                and remark = #{record.remark,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.RepairRecord" resultType="RepairRecord">
+        select RR.id, P.CPSN AS cpsn,P.BLSN AS blsn,PC.NAME AS processName,PL.NAME AS productLineName,U.NAME AS userName
+        ,RR.BAD_CODE as badCode,RR.BAD_TYPE AS badType,RR.BAD_RESON as badReson,RR.repair,RR.remark,RR.create_time createTime,RR.MODIFY_TIME AS modifyTime
+        from Repair_Record RR
+        INNER JOIN PROCESS_RECORD PR ON PR.ID = RR.process_record_ID AND PR.PRODUCT_ID = RR.PRODUCT_ID
+        INNER JOIN  PRODUCT P ON RR.PRODUCT_ID = P.ID AND P.ID = RR.PRODUCT_ID
+        LEFT JOIN PROCESS PC ON PR.PROCESS_CODE = PC.CODE
+        LEFT JOIN PRODUCT_LINE PL ON PL.CODE = PR.PRODUCT_LINE
+        LEFT JOIN QA_USER U ON U.ID = RR.user_id
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and  RR.ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.productLine != null">
+                and  PR.PRODUCT_LINE = #{record.productLine,jdbcType=VARCHAR}
+            </if>
+            <if test="record.processRecordId != null">
+                and  RR.PROCESS_RECORD_ID = #{record.processRecordId,jdbcType=BIGINT}
+            </if>
+            <if test="record.productId != null">
+                and  RR.PRODUCT_ID = #{record.productId,jdbcType=VARCHAR}
+            </if>
+            <if test="record.cpsn != null">
+                and  P.CPSN = #{record.cpsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.blsn != null">
+                and  P.BLSN = #{record.blsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.processCode != null">
+                and  PR.PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.repairProcessCode != null">
+                and  RR.REPAIR_PROCESS_CODE = #{record.repairProcessCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badCode != null">
+                and  RR.BAD_CODE = #{record.badCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badName != null">
+                and  RR.BAD_NAME = #{record.badName,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badType != null">
+                and  RR.BAD_TYPE = #{record.badType,jdbcType=VARCHAR}
+            </if>
+            <if test="record.badReson != null">
+                and  RR.BAD_RESON = #{record.badReson,jdbcType=VARCHAR}
+            </if>
+            <if test="record.repair != null">
+                and  RR.REPAIR = #{record.repair,jdbcType=BIGINT}
+            </if>
+            <if test="record.userId != null">
+                and  RR.user_id = #{record.userId,jdbcType=VARCHAR}
+            </if>
+            <if test="record.createTime != null">
+                and RR.CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.modifyTime != null">
+                and RR.MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.remark != null">
+                and RR.remark = #{record.remark,jdbcType=VARCHAR}
+            </if>
+        </trim>
+            ORDER BY PC.CODE,RR.BAD_CODE,RR.MODIFY_TIME
+    </select>
+</mapper>

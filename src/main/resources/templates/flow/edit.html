@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统- 产品工站流程</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" src="/js/Sortable.js" th:src="@{/js/Sortable.js}"></script>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+    <style type="text/css">
+        .glyphicon-move {
+            width: 100%;
+            font-size: 30px;
+            text-align: center;
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-container" sec:authorize="hasRole('ROLE_ADMIN')">
+    <div class="layui-row">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">型号代码</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" th:value="${productType.code}" disabled="disabled"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">产品名称</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" th:value="${productType.name}" disabled="disabled"/>
+                    </div>
+                </div>
+            </div>
+            <!---->
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">设置当前工站</label>
+                    <div class="layui-input-inline">
+                        <select id="processCodeSelect" name="processCodeSelect">
+                            <option value="">请选择设置当前工站</option>
+                            <option th:each="process:${processes}" th:if="${process.type} ==0"
+                                    th:value="${process.code}" th:text="${process.name}">请选择设置当前工站
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">设置下一工站</label>
+                    <div class="layui-input-block">
+                        <select id="nextProcessCodeSelect" name="nextProcessCodeSelect">
+                            <option value="">请选择设置下一工站</option>
+                            <option th:each="process:${processes}" th:if="${process.type} ==0"
+                                    th:value="${process.code}" th:text="${process.name}">请选择设置下一工站
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">设置维修工站</label>
+                    <div class="layui-input-block">
+                        <select id="repairProcessCodeSelect" name="repairProcessCodeSelect">
+                            <option value="">请选择设置维修工站</option>
+                            <option th:each="process:${processes}" th:if="${process.type} ==1"
+                                    th:value="${process.code}" th:text="${process.name}">请选择设置维修工站
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-bg-green" lay-submit="" lay-filter="add">
+                        <i class="layui-icon">&#xe608;</i> 添加
+                    </button>
+                </div>
+            </div>
+            <hr/>
+            <!---->
+            <section id="flowSection"></section>
+            <!---->
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <button class="layui-btn" lay-submit="" lay-filter="formSubmit">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script id="nextFlow" type="text/html">
+    <div class="layui-form-item">
+        <input type="hidden" name="productTypeCode" value="{{d.productTypeCode}}"/>
+        <div class="layui-inline">
+            <label class="layui-form-label">当前工站</label>
+            <div class="layui-input-inline">
+                <select name="processCode">
+                    <option value="{{d.processCode}}">{{d.processName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">下一工站</label>
+            <div class="layui-input-block">
+                <select name="nextProcessCode">
+                    <option value="{{d.nextProcessCode}}">{{d.nextProcessName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">维修工站</label>
+            <div class="layui-input-block">
+                <select name="repairProcessCode">
+                    <option value="{{d.repairProcessCode}}">{{d.repairProcessName}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <button class="layui-btn layui-btn-sm layui-btn-primary" lay-submit="" lay-filter="del">
+                <i class="layui-icon">&#xe640;</i>
+            </button>
+        </div>
+    </div>
+</script>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'layer', 'laytpl'], function () {
+        var layer = layui.layer
+            , form = layui.form;
+        var laytpl = layui.laytpl;
+        var processMap = [[${processMap}]];
+        var flows = [[${flows}]];
+        var template = nextFlow.innerHTML;
+        var view = $("#flowSection");
+        var productTypeCode = [[${productType.code}]];
+        layui.each(flows, function (i, d) {
+            var data = {};
+            data['productTypeCode'] = productTypeCode;
+            data['processCode'] = d['processCode'] || '';
+            data['processName'] = d['processName'] || '无';
+            data['nextProcessCode'] = d['nextProcessCode'] || '';
+            data['nextProcessName'] = d['nextProcessName'] || '无';
+            data['repairProcessCode'] = d['repairProcessCode'] || '';
+            data['repairProcessName'] = d['repairProcessName'] || '无';
+            data['productTypeCode'] = productTypeCode;
+            var processCode = data['processCode'];
+            var nextProcessCode = data['nextProcessCode'];
+            if (!!processCode) {
+                $("#processCodeSelect option[value=" + processCode + "]").attr("disabled", "disabled");
+            }
+            if (!!nextProcessCode) {
+                $("#nextProcessCodeSelect option[value=" + nextProcessCode + "]").attr("disabled", "disabled");
+            }
+            laytpl(template).render(data, function (html) {
+                view.append(html);
+            });
+            form.render("select");
+        });
+        form.render("select");
+        form.on('submit(add)', function (data) {
+            var processCode = $("#processCodeSelect").val();
+            var nextProcessCode = $("#nextProcessCodeSelect").val();
+            var repairProcessCode = $("#repairProcessCodeSelect").val();
+            if (!processCode) {
+                layer.msg("请选择设置当前工站")
+            } else if (!nextProcessCode && "T13" != processCode) {
+                layer.msg("请选择设置下一工站")
+            } else {
+                if (!!processCode) {
+                    $("#processCodeSelect option[value=" + processCode + "]").attr("disabled", "disabled");
+                }
+                if (!!nextProcessCode) {
+                    $("#nextProcessCodeSelect option[value=" + nextProcessCode + "]").attr("disabled", "disabled");
+                }
+                var process = processMap[processCode] || {'name': '无'};
+                var nextProcess = processMap[nextProcessCode] || {'name': '无'};
+                var repairProcess = processMap[repairProcessCode] || {'name': '无'};
+                var data = {};
+                data['productTypeCode'] = productTypeCode;
+                data['processCode'] = process['code'];
+                data['processName'] = process['name'];
+                data['nextProcessCode'] = nextProcess['code'];
+                data['nextProcessName'] = nextProcess['name'];
+                data['repairProcessCode'] = repairProcess['code'];
+                data['repairProcessName'] = repairProcess['name'];
+                laytpl(template).render(data, function (html) {
+                    view.append(html);
+                });
+                form.render("select");
+            }
+            return false;
+        });
+        form.on('submit(del)', function (data) {
+            var formIten = data.elem.parentElement.parentElement;
+            var processCode = $("select[name='processCode']", formIten).val();
+            var nextProcessCode = $("select[name='nextProcessCode']", formIten).val();
+            if (!!processCode) {
+                $("#processCodeSelect option[value=" + processCode + "]").removeAttr("disabled");
+            }
+            if (!!nextProcessCode) {
+                $("#nextProcessCodeSelect option[value=" + nextProcessCode + "]").removeAttr("disabled");
+            }
+            form.render("select");
+            formIten.remove();
+            return false;
+        });
+        form.on('submit(formSubmit)', function (data) {
+            var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+            var fm = data.form;
+            var productTypeCodes = fm.productTypeCode;
+            var processCodes = fm.processCode;
+            var nextProcessCodes = fm.nextProcessCode;
+            var repairProcessCodes = fm.repairProcessCode;
+            var flows = [];
+            if (!productTypeCodes) {
+                top.layer.close(index);
+                top.layer.msg("没有流程可以保持，请设置");
+                return false;
+            }
+            if (!productTypeCodes.length) {
+                flows[0] = {
+                    "productTypeCode": productTypeCodes.value,
+                    "processCode": processCodes.value,
+                    "nextProcessCode": nextProcessCodes.value=="undefined"?"":nextProcessCodes.value,
+                    "repairProcessCode": repairProcessCodes.value=="undefined"?"":repairProcessCodes.value
+                };
+            } else {
+                for (var i = 0; i < productTypeCodes.length; i++) {
+                    flows[i] = {
+                        "productTypeCode": productTypeCodes[i].value,
+                        "processCode": processCodes[i].value,
+                        "nextProcessCode": nextProcessCodes[i].value=="undefined"?"":nextProcessCodes[i].value,
+                        "repairProcessCode": repairProcessCodes[i].value=="undefined"?"":repairProcessCodes[i].value
+                    };
+                }
+            }
+            if (flows.length == 0) {
+                top.layer.close(index);
+                top.layer.msg("没有流程可以保持，请设置");
+                return false;
+            }
+            $.ajax({
+                url: /*[[@{/flow/save}]]*/ null,
+                type: 'post',
+                data: JSON.stringify(flows),
+                dataType: 'json',
+                contentType: "application/json", // 指定这个协议很重要
+                success: function (res) {
+                    top.layer.close(index);
+                    if (res.code != 200) {
+                        top.layer.msg(res.msg);
+                    } else {
+                        // 刷新父页面
+                        //var frame = layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        layer.closeAll("iframe"); //再执行关闭                        //刷新父页面
+                        parent.location.reload();
+                    }
+                },
+                error: function (e, m) {
+                    top.layer.close(index);
+                    top.layer.msg('数据提交异常');
+                }
+            });
+            return false;
+        });
+    });
+    /* ]]>*/
+</script>
+</body>
+</html>

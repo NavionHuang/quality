@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>品质管理系统-工作台</title>
+    <link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <script type="text/javascript" src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+    <style>
+        body {
+            font-size: 1.2em;
+        }
+
+        .table-label {
+            padding: 8px 2px;
+            height: 38px;
+            line-height: 20px;
+            border: 1px solid #e6e6e6;
+            border-radius: 2px 0 0 2px;
+            text-align: center;
+            background-color: #FBFBFB;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .table-text {
+            padding: 8px 10px;
+            height: 38px;
+            line-height: 20px;
+            text-align: left;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .cmd_line {
+            color: #9F9F9F;
+        }
+
+        .cmd_input {
+            padding-right: 3%;
+        }
+
+        .cmd_result {
+            padding-left: 2%;
+        }
+
+        .success {
+            color: #5FB878;
+        }
+
+        .warn {
+            color: #FF5722;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+        }
+
+        .panel-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+
+        .panel-heading {
+            padding: 10px 15px;
+            border-bottom: 1px solid transparent;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+
+        .panel-body {
+            padding: 15px;
+            background-color: #ffffff;
+        }
+
+        .table {
+            text-align: left;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 5px;
+            background-color: transparent;
+            border-spacing: 0;
+            line-height: 24px;
+        }
+        pre ol{
+            list-style-type:disc;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-fluid" sec:authorize="hasRole('ROLE_WORKER')">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>品质管理系统-工作台</legend>
+    </fieldset>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="panel panel-info">
+                <div class="panel-heading">基本信息</div>
+                <div class="panel-body">
+                    <table class="table" style="border-collapse:separate; border-spacing:0px 5px;">
+                        <tbody>
+                        <tr>
+                            <td class="table-label" style="width: 20%">工单号：</td>
+                            <td id="po" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                            <td class="table-label" style="width: 20%">制单数量：</td>
+                            <td id="ponum" class="table-text"  style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">线别：</td>
+                            <td id="line" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                            <td class="table-label" style="width: 20%">产品类型：</td>
+                            <td id="productType" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">作业员：</td>
+                            <td id="username" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                            <td class="table-label" style="width: 20%">站点：</td>
+                            <td id="state" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-label" style="width: 20%">状态：</td>
+                            <td id="status" rowspan="3" class="table-text" style="background-color: #fbfbfb; color: #000;"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr/>
+    </div>
+    <div class="layui-row" style="width: 99%">
+        <div class="layui-col-md12">
+            <div class="panel panel-info">
+                <div class="panel-heading">工作区域</div>
+                <div class="panel-body">
+                    <div>
+                        <span style="position: absolute;line-height:38px;padding: 0 5px"> &gt; </span>
+                        <input type="text" class="layui-input" style="padding-left: 20px" id="cmd" placeholder="请输入"/>
+                    </div>
+                    <pre class="layui-code" lay-title="工作日志" id="cmd_log"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<audio id="p" th:src="@{/audio/p.wav}" src="/audio/f.wav" align="center" border="0" width="1"
+		height="1" ></audio>
+<audio id="f" th:src="@{/audio/f.wav}" src="/audio/f.wav" align="center" border="0" width="1"
+		height="1" ></audio>
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_REPAIR')">
+    没有权限
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['code', 'jquery', 'layer'], function () {
+        layui.code({about: false});
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var numLine = 1;
+        var contextPath = [[${#httpServletRequest.getContextPath()}]];
+        updateInfo();
+        var workinfo = {};
+
+        function updateInfo() {
+            $.ajax({
+                url: contextPath + "/api/v1/info",
+                type: "POST",
+                dataType: "json",
+                success: function (obj) {
+                    var line = obj['line'] || {};
+                    var user = obj['user'] || {};
+                    var po = obj['po'] || {};
+                    var process = obj['process'] || {};
+                    workinfo['usercode'] = user['code'] || '';
+                    workinfo['username'] = user['name'] || '';
+                    workinfo['linecode'] = line['code'] || '';
+                    workinfo['linename'] = line['name'] || '';
+                    workinfo['processCode'] = process['code'] || '';
+                    workinfo['processName'] = process['name'] || '';
+                    workinfo['data_regx'] = process['sntregex']||'\\S+';
+                    workinfo['sheetpo'] = po['sheetPo'] || '';
+                    workinfo['outputnum'] = po['outputNum'] || '';
+                    workinfo['producttypecode'] = po['productTypeCode'] || '';
+                    workinfo['producttypename'] = po['productTypeName'] || '';
+                    $("#username").text(workinfo['username']);
+                    $("#line").text(workinfo['linename']);
+                    $("#state").text(workinfo['processName']);
+                    $("#po").text(workinfo['sheetpo']);
+                    $("#ponum").text(workinfo['outputnum']);
+                    $("#productType").text(workinfo['producttypecode']);
+                    var ok_ng = workinfo['data_regx'];
+                    var regs = ok_ng.split("##");
+                    if (regs.length>0){
+                        workinfo['ok_reg'] = regs[0];
+                    }
+                    if (regs.length>1){
+                        workinfo['ng_reg'] = regs[1];
+                    }
+                }
+            });
+
+        }
+
+        $("#cmd").on('keyup', function (event) {
+            var that = this;
+            if (event.keyCode == 13) {
+                var text = that.value;
+                var login_regx = /^login\s+\S+$/i;//登录
+                var logout_regx = /^logout/i;//退出
+                var ng_regx = /^ng\s+\S+\s+\S+$/i;//ng
+                var setline_regx = /^setline\s+\S+$/i;//设置线别
+                var setpo_regx = /^setpo\s+\S+$/i;//设置线别
+                var cmd_regx = /^(login|logout|ng|setline|setpo)/i;
+                var data_regx = null;
+                if (!!workinfo['ng_reg']){
+                    ng_regx = new RegExp(workinfo['ng_reg']);
+                }
+                if (!!workinfo['ok_reg']){
+                    data_regx = new RegExp(workinfo['ok_reg']);
+                }
+                //var data_regx = new RegExp(workinfo['data_regx']);
+                if (!!text) {
+                    //删除第一行日志，防止日志过多
+                    if ($("#cmd_log").find("li").length > 10) {
+                        var firstLi = $("#cmd_log").find("li:last-child");
+                        firstLi.remove();
+                    }
+                    //输入的是命令行
+                    if (login_regx.test(text) || logout_regx.test(text) || ng_regx.test(text) || setline_regx.test(text) || setpo_regx.test(text)) {
+                        //命令+数据
+                        var cmdText = text;
+                        $("#cmd").val('');
+                        runCmd(cmdText);
+                    } else if (cmd_regx.test(text)) {//输入的是命令，加上空格输入命令参数
+                        $("#cmd").val(text + " ");
+                    }else if (data_regx.test(text)||ng_regx.test(text) ) {//不限定格式，但是必须优先命令
+                        var cmdText = text;
+                        $("#cmd").val('');
+                        runCmd(cmdText);
+                    }else{
+                        $("#cmd").val(text + " ");
+                        var param = text.split(/\s+/);
+                        if (param.length>5 || text.length > 80){
+                            layer.msg("参数错误，请重新输入");
+                            $("#cmd").val('');
+                        }
+                    }
+                }
+            }
+            $("#cmd").focus();
+        });
+
+        function runCmd(text) {
+            var param = text.split(/\s+/);
+            if (param.length >= 1 && param.length < 5) {
+                var cmd = param[0];
+                var url = "";
+                if (cmd.match(/^login$/i)) {
+                    //登录
+                    if (workinfo['usercode'] && workinfo['usercode'] != param[1]) {
+                        layer.msg("用户" + workinfo['username'] + "已登陆，请先退出");
+                        return;
+                    }
+                    $.ajax({
+                        url: "/login",
+                        type: "POST",
+                        data: {'username': param[1], 'password': '123456'},
+                        dataType: "html",
+                        success: function (obj) {
+                            window.top.location = /*[[@{/work.html}]]*/null;  // 跳转到提示页
+                        },
+                        error: function (error) {
+                            layer.msg("系统错误");
+                        }
+                    });
+                    return;
+                } else if (cmd.match(/^logout/i)) {
+                    //退出
+                    window.top.location = /*[[@{/logout}]]*/null;  // 跳转到提示页
+                    return;
+                } else if (cmd.match(/^setline/i)) {
+                    //线别
+                    url = param[1] + "/setline";
+                } else if (cmd.match(/^setpo/i)) {
+                    //工单
+                    url = encodeURIComponent(param[1]) + "/setpo";
+                } else {
+                    //必须先登录之后
+                    if (!workinfo['usercode']) {
+                        layer.msg("用户未登陆，请重新登陆");
+                        return;
+                    }
+                    if (!workinfo['linecode']) {
+                        layer.msg("未设置线别，请设置线别");
+                        return;
+                    }
+                    if (!workinfo['sheetpo']) {
+                        layer.msg("未设置工单，请设置工单");
+                        return;
+                    }
+                    var ng_regx = new RegExp(workinfo['ng_reg']);
+                    if (cmd.match(/^ng/i)) {
+                        //NG
+                        ///{不良码}/{sn}
+                        url = param[1] + '/' + param[2] + "/ng";
+                    } else if( ng_regx.test(text)){
+                        url = param[0] + '/' + param[1] + "/ng";
+                    }else {
+                        //工单/{线别}/{工号}/{sn}
+                        for(var i=0;i<param.length;i++){
+                            if(i==2){
+                            	url = url +	encodeURIComponent(param[i])+"/"
+                            	break;
+                            }
+                            url = url +param[i] +"/"
+                        }
+                        url = url + "ok";
+                    }
+                }
+                if (!!url) {
+                    $.ajax({
+                        url: contextPath + "/api/v1/" + url,
+                        type: "POST",
+                        dataType: "json",
+                        success: function (obj) {
+                            if (obj.code == 200) {
+                            	document.getElementById("p").play();
+                                logCmd(text, obj.msg, 0);
+                                updateInfo();
+                            } else if (obj.code == -1) {
+                            	document.getElementById("f").play();
+                                logCmd(text, obj.msg, 1);
+                            } else {
+                                layer.msg("您已太久没使用，请重新登陆");
+                                updateInfo();
+                            }
+                        },
+                        error: function (error) {
+                            //logCmd(text, "系统错误" + error.status, 2);
+                            layer.msg("系统错误");
+                            location.reload();
+                        }
+                    });
+                }
+            } else {
+                layer.msg("参数错误，请重新输入");
+            }
+        }
+
+        function logCmd(text, result, type) {
+            var div = '';
+            $("#status").empty();
+            if (type == 0) {
+                $("#status").append('<span class="cmd_status success">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result success">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            } else if (type == 1) {
+                $("#status").append('<span class="cmd_status warn">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result warn">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            } else {
+                $("#status").append('<span class="cmd_status error">[' + numLine + ']' + result + '</span>');
+                div = div + '<div><span class="cmd_line">[第' + numLine + '行命令]</span><span class="cmd_input">' + text + '</span><span class="cmd_result error">[命令执行结果]——&gt;&gt;&gt;&gt;' + result + '</span></div>';
+            }
+            numLine = numLine + 1;
+            var first = $("#cmd_log").find("li:first-child");
+            var span = first.find("div");
+            if (span.length == 0) {
+                first.prepend(div);
+            } else {
+                var li = '<li>' + div + '</li>'
+                $("#cmd_log").find("ol").prepend(li);
+            }
+
+        }
+
+        $("#cmd").focus();
+
+        function checkLogin(){
+            $.ajax({
+                url:contextPath+'/checkLogin',
+                type:'POST',
+                dataType:'json',
+                success:function(data){
+                    //10分钟请求一次，重新回调
+                   // setTimeout(checkLogin, 600000);
+                }
+            });
+        }
+        //10分钟请求一次，
+        //setTimeout(checkLogin, 600000);
+        setInterval(checkLogin, 600000);
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

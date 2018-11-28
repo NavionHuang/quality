@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<title>品质管理系统</title>
+<link rel="stylesheet" type="text/css"
+	href="/static/layui/css/layui.css" th:href="@{/layui/css/layui.css}" />
+<link rel="stylesheet" type="text/css" href="/static/css/index.css"
+	th:href="@{/css/index.css}" />
+<link rel="stylesheet" type="text/css" href="/static/css/common.css"
+	th:href="@{/css/common.css}" />
+<script type="text/javascript" src="/layui/layui.js"
+	th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header header">
+			<div class="layui-main">
+				<a class="logo">品质管理系统</a>
+				<div class="top_menu">
+					<ul class="layui-nav top-nav-container" lay-filter="top_menu">
+						<li class="layui-nav-item layui-this"><a><span>首页</span></a></li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a><span>工单管理</span></a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')"><a><span>工站管理</span></a></li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a><span>统计分析</span></a>
+						</li>
+					</ul>
+				</div>
+				<div class="top_admin_user">
+					<ul class="layui-nav">
+						<li class="layui-nav-item"><a href="javascript:;"
+							style="min-width: 100px"> <!--<img width="35" height="35" class="layui-circle" src="images/face.jpg"/>-->
+								<span sec:authentication="name"></span> <span
+								class="layui-nav-more"></span></a>
+							<dl class="layui-nav-child">
+								<dd>
+									<a href="javascript:;" id="info"><i
+										class="iconfont icon-zhanghu" data-icon="icon-zhanghu"></i><span>个人资料</span></a>
+								</dd>
+								<dd>
+									<a id="changePassword" href="javascript:;"><i
+										class="iconfont icon-shezhi1" data-icon="icon-shezhi1"></i><span>修改密码</span></a>
+								</dd>
+								<dd>
+									<a id="signOut" href="javascript:;"><i
+										class="iconfont icon-loginout"></i><cite>退出</cite></a>
+								</dd>
+							</dl></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="layui-side layui-bg-black">
+			<div class="layui-side-scroll">
+				<div class="to_menu_list layui-show">
+					<div class="top_menu_title">
+						<i class="layui-icon"></i><span>首页</span>
+					</div>
+					<ul class="layui-nav layui-nav-tree">
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_SUPPER','ROLE_ADMIN','ROLE_MANAGER')">
+							<a href="javascript:;" th:attr="data-url=@{/user/list.html}">
+								<i class="layui-icon"></i><span>用户管理</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_REPAIR')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/process_record/list.html}"> <i
+								class="layui-icon"></i><span>作业管理</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER','ROLE_REPAIR')">
+							<a href="javascript:;" th:attr="data-url=@{/repair/list.html}">
+								<i class="layui-icon"></i><span>维修管理</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/burn/list.html}"> 
+							<i class="layui-icon"></i><span>邦板烧录</span>
+						</a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_REPAIR')">
+							<a href="javascript:;" th:attr="data-url=@{/repair.html}"
+							target="_blank"> <i class="layui-icon"></i><span>维修工作台</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_REPAIR')"><a
+							href="javascript:;" th:attr="data-url=@{/product/list.html}">
+								<i class="layui-icon"></i><span>产品追溯</span>
+						</a></li>
+						<!--
+                    <li class="layui-nav-item" sec:authorize="hasRole('ROLE_MANAGER')">
+                        <a href="javascript:;" th:attr="data-url=@{/badcod/list.html}">
+                            <i class="layui-icon"></i><span>不良码列表</span>
+                        </a>
+                    </li>
+                   <li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                        <a href="javascript:;" th:attr="data-url=@{/syslog/list.html}">
+                            <i class="layui-icon"></i><span>工作日志</span>
+                        </a>
+                    </li>-->
+					</ul>
+				</div>
+				<div class="to_menu_list layui-hide">
+					<div class="top_menu_title">
+						<i class="layui-icon"></i> <span>工单管理</span>
+					</div>
+					<ul class="layui-nav layui-nav-tree">
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;" th:attr="data-url=@{/sheet/list.html}">
+								<i class="layui-icon"></i><span>工单列表</span>
+						</a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/product_type/list.html}"> <i
+								class="layui-icon"></i><span>产品类型</span>
+						</a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;" th:attr="data-url=@{/bom/list.html}">
+								<i class="layui-icon"></i><span>附件清单</span>
+						</a>
+						</li>
+					</ul>
+				</div>
+				<div class="to_menu_list layui-hide">
+					<div class="top_menu_title">
+						<i class="layui-icon"></i> <span>工站管理</span>
+					</div>
+					<ul class="layui-nav layui-nav-tree">
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')"><a
+							href="javascript:;" th:attr="data-url=@{/process/list.html}">
+								<i class="layui-icon"></i><span>工站列表</span>
+						</a></li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;" th:attr="data-url=@{/badcod/list.html}">
+								<i class="layui-icon"></i><span>不良码列表</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')"><a
+							href="javascript:;" th:attr="data-url=@{/flow/list.html}"> <i
+								class="layui-icon"></i><span>工作流程</span>
+						</a></li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')"><a
+							href="javascript:;" th:attr="data-url=@{/product_line/list.html}">
+								<i class="layui-icon"></i><span>线别列表</span>
+						</a></li>
+					</ul>
+				</div>
+				<div class="to_menu_list layui-hide">
+					<div class="top_menu_title">
+						<i class="layui-icon"></i> <span>统计分析</span>
+					</div>
+					<ul class="layui-nav layui-nav-tree">
+						<!-- <li class="layui-nav-item" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+                        <a href="javascript:;" th:attr="data-url=@{/statistics/bySheet.html}">
+                            <i class="layui-icon"></i><span>工单统计</span>
+                        </a>
+                    </li>
+                    <li class="layui-nav-item" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+                        <a href="javascript:;" th:attr="data-url=@{/statistics/byLine.html}">
+                            <i class="layui-icon"></i><span>线别统计</span>
+                        </a>
+                    </li>-->
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/statistics/byState.html}"> <i
+								class="layui-icon"></i><span>品质管控</span>
+						</a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/statistics/query_count_time_by_state.html}">
+								<i class="layui-icon"></i><span>产出追溯</span>
+						</a>
+						</li>
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/statistics/query_count_by_state.html}">
+								<i class="layui-icon"></i><span>WIP查询</span>
+						</a>
+						</li>
+						<!--  <li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                        <a href="javascript:;" th:attr="data-url=@{/statistics/query_by_product.html}">
+                            <i class="layui-icon"></i><span>产品追溯</span>
+                        </a>
+                    </li>-->
+						<li class="layui-nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a href="javascript:;"
+							th:attr="data-url=@{/statistics/query_sninfo.html}"> <i
+								class="layui-icon"></i><span>物料追溯</span>
+						</a>
+						</li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')"><a
+							href="javascript:;" th:attr="data-url=@{/product/list.html}">
+								<i class="layui-icon"></i><span>产品追溯</span>
+						</a></li>
+						<li class="layui-nav-item"
+							sec:authorize="hasAnyRole('ROLE_ADMIN')"><a
+							href="javascript:;" th:attr="data-url=@{/statistics/query_data_statement.html}">
+								<i class="layui-icon"></i><span>数据报表</span>
+						</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="layui-body">
+			<div class="layui-tab top_tab_box" style="margin: 0"
+				lay-filter="bodytab">
+				<ul class="layui-tab-title top_tab">
+					<li lay-id="" class="layui-this"><i
+						class="iconfont icon-computer"></i> <span>后台首页</span></li>
+				</ul>
+				<div class="closeBox">
+					<div>
+						<a class="refresh refreshThis" href="javascript:;"
+							style="display: block; padding: 10px 5px"><i
+							class="layui-icon">ဂ</i><span>刷新当前</span></a>
+					</div>
+				</div>
+				<div class="layui-tab-content child-iframe">
+					<div class="layui-tab-item layui-show">
+						<iframe src="./main.html" th:src="@{./main.html}"
+							sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')"></iframe>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--<div class="layui-footer footer">
+        <div>
+            <div class="text-center">© www.lifesense.com - 广东乐心医疗股份有限公司</div>
+        </div>
+    </div>-->
+	</div>
+	<!--修改密码-->
+	<div id="changePassword_div" hidden="hidden" style="margin: 5px 20px">
+		<form class="layui-form layui-form-pane">
+			<div class="layui-form-item">
+				<label class="layui-form-label">原密码</label>
+				<div class="layui-input-block">
+					<input type="password" id="oldPassword" name="oldPassword"
+						placeholder="请输入原密码" class="layui-input" lay-verify="required" />
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">新密码</label>
+				<div class="layui-input-block">
+					<input type="password" id="password" name="password"
+						lay-verify="required" placeholder="请输入新密码" class="layui-input" />
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">确认密码</label>
+				<div class="layui-input-block">
+					<input type="password" id="comfirmPassword" name="comfirmPassword"
+						lay-verify="required" placeholder="请输入新密码" class="layui-input" />
+				</div>
+			</div>
+		</form>
+	</div>
+	<div id="info_div" hidden="hidden" style="margin: 5px 20px">
+		<div class="layui-form layui-form-pane" th:object="${user}">
+			<div class="layui-form-item">
+				<label class="layui-form-label">工号</label>
+				<div class="layui-input-block">
+					<span class="layui-input" th:text="*{code}"></span>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">姓名</label>
+				<div class="layui-input-block">
+					<span class="layui-input" th:text="*{name}"></span>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">角色</label>
+				<div class="layui-input-block">
+					<span class="layui-input" th:if="*{processSign}==1">管理员</span> <span
+						class="layui-input" th:if="*{processSign}==3">组长</span> <span
+						class="layui-input" th:if="*{processSign}==2">维修员</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		/* <![CDATA[*/
+		layui
+				.config({
+					base : "./js/"
+				})
+				.use(
+						[ 'jquery', 'bodytab', 'element', 'layer', 'common' ],
+						function() {
+							var $ = layui.jquery, form = layui.form, layer = layui.layer, element = layui.element, tab = layui.bodytab;
+							var common = layui.common;
+
+							tab.set({
+								tabFilter : "bodytab",
+								openTabNum : "50" //最大可打开窗口数量
+							});
+
+							//打开新窗口
+							function addTab(_this) {
+								tab.tabAdd(_this);
+							}
+
+							// 添加新窗口
+							$("body")
+									.on(
+											"click",
+											".layui-nav .layui-nav-item a[data-url]",
+											function() {
+												//如果不存在子级
+												if ($(this).siblings().length == 0) {
+													addTab($(this));
+												}
+												$(this)
+														.parent("li")
+														.siblings()
+														.removeClass(
+																"layui-nav-itemed");
+											});
+
+							//个人信息
+							$("#info").on('click', function() {
+								layer.open({
+									type : 1,
+									title : '个人信息',
+									area : [ '400px', '300px' ],
+									content : $('#info_div')
+								});
+							});
+
+							//修改密码
+							$("#changePassword")
+									.on(
+											'click',
+											function() {
+												layer
+														.open({
+															type : 1,
+															title : '修改密码',
+															area : [ '400px',
+																	'300px' ],
+															content : $('#changePassword_div'),
+															btn : [ '确定', '取消' ],
+															btnAlign : 'c',
+															yes : function(
+																	index,
+																	layero) {
+																var oldPassword = $(
+																		"#oldPassword",
+																		layero)
+																		.val();
+																var comfirmPassword = $(
+																		"#comfirmPassword",
+																		layero)
+																		.val();
+																var password = $(
+																		"#password",
+																		layero)
+																		.val();
+																if (comfirmPassword != password) {
+																	layer
+																			.msg('确认密码与新密码不一致');
+																} else {
+																	var field = {
+																		oldPassword : oldPassword,
+																		password : password
+																	};
+																	common
+																			.ajaxCommit(
+																					"./user/changePassword",
+																					field);
+																	return false;
+																}
+															}
+														});
+											});
+
+							//退出
+							$("#signOut").on('click', function() {
+								window.sessionStorage.removeItem("menu");
+								window.sessionStorage.removeItem("curmenu");
+								common.logOut("温馨提示", "确定退出系统", "./logout")
+							});
+
+							//刷新当前
+							$(".refresh").on("click", function() {
+								tab.reflush(this);
+							});
+
+							//关闭其他
+							$(".closePageOther").on("click", function() {
+								tab.closeOther();
+							});
+							//关闭全部
+							$(".closePageAll").on("click", function() {
+								tab.closeAll();
+							});
+
+							//头部菜单点击
+							element
+									.on(
+											'nav(top_menu)',
+											function(elem) {
+												var title = $(elem)
+														.find("span").text();
+												$(
+														".layui-side-scroll div.top_menu_title")
+														.each(
+																function() {
+																	if ($(this)
+																			.find(
+																					"span")
+																			.text() == title) {
+																		$(this)
+																				.parent()
+																				.removeClass(
+																						"layui-hide");
+																		$(this)
+																				.parent()
+																				.addClass(
+																						"layui-show");
+																	} else {
+																		$(this)
+																				.parent()
+																				.removeClass(
+																						"layui-show");
+																		$(this)
+																				.parent()
+																				.addClass(
+																						"layui-hide");
+																	}
+																});
+											});
+						});
+
+		/* ]]>*/
+	</script>
+</body>
+</html>

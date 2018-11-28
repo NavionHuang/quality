@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统-品质管控</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<!--头部查询form-->
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+    <div class="layui-row">
+        <div class="search">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-inline">
+                    <label class="layui-form-label">工单号</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入工号" name="sheetPo" id="sheetPo" th:value="(${param.sheetPo}?${param.sheetPo[0]}:'')"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">型号代码</label>
+                    <div class="layui-input-inline">
+                        <select   name="productType" id="productType">
+                            <option value="">请选择型号代码</option>
+                            <option th:each="productType:${productTypes}" th:value="${productType.code}" th:text="${productType.code}" th:selected="${param.productType !=null and  productType.code eq param.productType[0]}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">线别</label>
+                    <div class="layui-input-inline">
+                        <select name="productLineCode" id="productLineCode">
+                            <option value="">请选择线别</option>
+                            <option th:each="productLine:${productLines}" th:value="${productLine.code}"
+                                    th:text="${productLine.name}" th:selected="${param.productLineCode !=null and productLine.code eq param.productLineCode[0]}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" lay-submit="" lay-filter="searchBtn" id="searchBtn">查询</button>
+                </div>
+            </div>
+        </div>
+        <!--中间表格内容-->
+        <div>
+            <table id="dataTable" class="layui-table">
+                <thead>
+                <tr>
+                    <th rowspan="2">订单号</th>
+                    <th rowspan="2">型号代码</th>
+                    <th rowspan="2">线别</th>
+                    <th rowspan="2">Overall FPYR(%)</th>
+                    <th rowspan="2">Overall YR(%)</th>
+                    <th colspan="3">T04.半成品测试</th>
+                    <th colspan="3">T06.WIFI测试</th>
+                    <th colspan="3">T08.验磅</th>
+                    <th colspan="3">T09.心率测试</th>
+                    <th colspan="3">T10.阻抗/偏载测试</th>
+                    <th colspan="3">T11.测压力开机</th>
+                    <th colspan="3">T12.外观检验</th>
+                </tr>
+                <tr>
+                    <!--T04-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T06-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T08-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T09-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T10-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T11-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                    <!--T12-->
+                    <th>Input Q'ty</th>
+                    <th>Defect Q'ty</th>
+                    <th>Y/R</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d:${page.data}">
+                    <td th:text="${d.SHEET_PO}">订单号</td>
+                    <td th:text="${d.PRODUCT_TYPE_CODE}">型号代码</td>
+                    <td th:text="${d.PRODUCT_LINE_NAME}">线别</td>
+                    <td th:text="${#numbers.formatDecimal(100*d.FFPNUM/d.PNUM,1,1)}+'%'">Overall FPYR(%)</td>
+                    <td th:text="${#numbers.formatDecimal(100*d.FPNUM/d.PNUM,1,1)}+'%'">Overall YR(%)</td>
+                    <th:block th:with="ST=(${d.STATES['T04']})?:${defaultState}">
+                        <!--T04-->
+                        <td th:text="(${ST['PNUM']})">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T04'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T06-->
+                    <th:block th:with="ST=(${d.STATES['T06']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T06'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T08-->
+                    <th:block th:with="ST=(${d.STATES['T08']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T08'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T09-->
+                    <th:block th:with="ST=(${d.STATES['T09']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T09'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T10-->
+                    <th:block th:with="ST=(${d.STATES['T10']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T10'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T11-->
+                    <th:block th:with="ST=(${d.STATES['T11']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T11'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                    <!--T12-->
+                    <th:block th:with="ST=(${d.STATES['T12']})?:${defaultState}">
+                        <td th:text="${ST['PNUM']}">Input Q'ty</td>
+                        <td>
+                            <a th:if="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}" class="layui-btn" href="javascript:void(0);" onclick="javascript:openDiv(this)" th:attr="a=${d.SHEET_PO},b=${d.PRODUCT_LINE_CODE},c='T12'"></a>
+                            <span th:unless="${ST['PRNUM']} gt 0" th:text="${ST['PRNUM']}"></span>
+                        </td>
+                        <td th:text="(${ST.PNUM}-${ST.PRNUM} gt 0 ? (100 - ${#numbers.formatDecimal(100*ST.PRNUM/ST.PNUM,1,1)})+'%' :'0.0%')">Y/R</td>
+                    </th:block>
+                </tr>
+                </tbody>
+            </table>
+            <div id="pageDiv"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    var rateFn = function (x, y) {
+        if (y == 0 || !y) {
+            return '0%';
+        }
+        if (x == 0 || !x) {
+            return '0%';
+        }
+        return (x / y * 100 ).toFixed(2) + '%';
+    };
+
+    var contextPath = [[${#httpServletRequest.getContextPath()}]];
+    var openDiv = function (e) {
+        var x = e.getAttribute('a');
+            var y=e.getAttribute('b');
+            var z =e.getAttribute('c');
+        var url = contextPath+'/statistics/' + encodeURIComponent(x) + '/' + encodeURIComponent(y) + '/' + encodeURIComponent(z) + '/query_repair';
+        layer.open({
+            title: '<i class="larry-icon larry-bianji3"></i>不良列表',
+            type: 2,
+            skin: 'layui-layer-molv',
+            content: [url, 'NO'],
+            area: ['700px', '500px']
+        });
+    };
+
+
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'table', 'laydate', 'jquery','laypage'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery;
+        var laypage = layui.laypage;
+
+        //完整功能
+        var page = 1;
+        var laypageIn = laypage.render({
+            elem: 'pageDiv'
+            ,count: /*[[${page.count}]]*/0
+            ,curr: /*[[${param.page}]]*/1
+            ,layout: [ 'prev', 'page', 'next', 'limit','count', 'skip']
+            ,jump: function(obj, first){
+                //首次不执行
+                page = obj.curr;
+                if(!first){
+                    var sheetPo = $("#sheetPo").val();
+                    var productLineCode = $("#productLineCode").val();
+                    var productType = $("#productType").val();
+                    var path = /*[[@{/statistics/byState.html}]]*/"";
+                    location.href = path+"?page="+page+"&sheetPo="+encodeURIComponent(sheetPo)+"&productLineCode="+encodeURIComponent(productLineCode)+"&productType="+encodeURIComponent(productType);
+                }
+            }
+        });
+
+
+        //监听提交，查询
+        form.on('submit(searchBtn)', function (obj) {
+            var field = obj.field;
+            var sheetPo = field['sheetPo'];
+            var productLineCode = field['productLineCode'] ;
+            var productType = field['productType'] ;
+            var path = /*[[@{/statistics/byState.html}]]*/"";
+            location.href = path+ "?page=1&sheetPo=" + encodeURIComponent(sheetPo) + "&productLineCode=" + encodeURIComponent(productLineCode)+"&productType="+encodeURIComponent(productType);;
+            return false;
+        });
+
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

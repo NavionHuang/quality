@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IProcessFlowDao">
+    <cache eviction="LRU" flushInterval="600000" size="1024" readOnly="true"/>
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.ProcessFlow">
+        <result column="PRODUCT_TYPE_CODE" jdbcType="VARCHAR" property="productTypeCode"/>
+        <result column="PROCESS_CODE" jdbcType="VARCHAR" property="processCode"/>
+        <result column="REPAIR_PROCESS_CODE" jdbcType="VARCHAR" property="repairProcessCode"/>
+        <result column="NEXT_PROCESS_CODE" jdbcType="VARCHAR" property="nextProcessCode"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    PRODUCT_TYPE_CODE, PROCESS_CODE, REPAIR_PROCESS_CODE,NEXT_PROCESS_CODE
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.ProcessFlowGeneratedCriteria"
+            resultType="com.lifesense.quality.domain.ProcessFlow">
+        SELECT PRODUCT_TYPE_CODE AS productTypeCode, PROCESS_CODE AS processCode, REPAIR_PROCESS_CODE AS
+        repairProcessCode,NEXT_PROCESS_CODE AS nextProcessCode,
+        P1.NAME AS processName,P2.NAME as nextProcessName,P3.NAME as repairProcessName,PT.NAME AS productTypeName
+        FROM (
+        select ROWNUM AS ID,
+        PF.PRODUCT_TYPE_CODE, PF.PROCESS_CODE, PF.REPAIR_PROCESS_CODE,PF.NEXT_PROCESS_CODE
+        from PROCESS_FLOW PF
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        ) T LEFT JOIN PROCESS P1 ON T.PROCESS_CODE = P1.CODE
+        LEFT JOIN PROCESS P2 ON T.NEXT_PROCESS_CODE = P2.CODE
+        LEFT JOIN PROCESS P3 ON T.REPAIR_PROCESS_CODE = P3.CODE
+        LEFT JOIN PRODUCT_TYPE PT ON T.PRODUCT_TYPE_CODE = PT.CODE
+        ORDER BY T.ID ASC
+    </select>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.ProcessFlowGeneratedCriteria">
+        delete from PROCESS_FLOW
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.ProcessFlow">
+    insert into PROCESS_FLOW(PRODUCT_TYPE_CODE, PROCESS_CODE, REPAIR_PROCESS_CODE,NEXT_PROCESS_CODE)
+    values (#{productTypeCode,jdbcType=VARCHAR}, #{processCode,jdbcType=VARCHAR}, #{repairProcessCode,jdbcType=VARCHAR},
+       #{nextProcessCode,jdbcType=VARCHAR})
+  </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.ProcessFlow">
+        insert into PROCESS_FLOW
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_code,
+            </if>
+            <if test="processCode != null">
+                PROCESS_CODE,
+            </if>
+            <if test="repairProcessCode != null">
+                REPAIR_PROCESS_CODE,
+            </if>
+            <if test="nextProcessCode != null">
+                NEXT_PROCESS_CODE,
+            </if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productTypeCode != null">
+                #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="processCode != null">
+                #{processCode,jdbcType=VARCHAR},
+            </if>
+            <if test="repairProcessCode != null">
+                #{repairProcessCode,jdbcType=VARCHAR},
+            </if>
+            <if test="nextProcessCode != null">
+                #{nextProcessCode,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.ProcessFlowGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from PROCESS_FLOW
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update PROCESS_FLOW
+        <set>
+            <if test="record.productTypeCode != null">
+                PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.processCode != null">
+                PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.repairProcessCode != null">
+                REPAIR_PROCESS_CODE = #{record.repairProcessCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.nextProcessCode != null">
+                NEXT_PROCESS_CODE = #{record.nextProcessCode,jdbcType=VARCHAR},
+            </if>
+
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update PROCESS_FLOW
+        set PRODUCT_TYPE_code = #{record.productTypeCode,jdbcType=VARCHAR},
+        PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR},
+        REPAIR_PROCESS_CODE = #{record.repairProcessCode,jdbcType=VARCHAR},
+        REPAIR_PROCESS_CODE = #{record.nextProcessCode,jdbcType=VARCHAR}
+
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+
+</mapper>

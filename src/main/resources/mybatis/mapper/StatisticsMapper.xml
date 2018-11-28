@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.StatisticsDao">
+	<!--工单统计 -->
+	<select id="spsBySheet" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT T.ID,T.SHEET_PO,
+		T.SHEET_NO,
+		T.PRODUCT_NO,
+		T.PRODUCT_TYPE_CODE,
+		T.OUTPUT_NUM,T.PNUM,T.PRNUM
+		FROM (SELECT WS.ID,WS.SHEET_PO,
+		WS.SHEET_NO,
+		WS.PRODUCT_NO,
+		WS.PRODUCT_TYPE_CODE,
+		WS.OUTPUT_NUM,COUNT(DISTINCT R.ID) AS PNUM,NVL(SUM(CASE WHEN R.STATUS = -1
+		THEN 1 END), 0) AS PRNUM FROM WORK_SHEET WS
+		LEFT JOIN (SELECT P.ID,P.SHEET_PO,PR.STATUS
+		FROM PRODUCT P ,PROCESS_RECORD PR
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND PR.STATUS &lt;= 0
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.start_time!=null">
+				AND P.CREATE_TIME &gt;= #{map.start_time,jdbcType=TIMESTAMP}
+			</if>
+			<if test="map.end_time!=null">
+				AND P.CREATE_TIME &lt;= #{map.end_time,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+		GROUP BY P.ID,P.SHEET_PO,PR.STATUS) R ON WS.SHEET_PO = R.SHEET_PO
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="map.sheet_po!=null">
+				AND ws.sheet_po = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY WS.ID,WS.SHEET_PO, WS.SHEET_NO, WS.PRODUCT_NO,
+		WS.PRODUCT_TYPE_CODE, WS.OUTPUT_NUM
+		) T ORDER BY T.ID DESC
+	</select>
+	<!--线别统计，已工单、工站统计 -->
+	<select id="spsByLine" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT T.ID,T.SHEET_PO,
+		T.PRODUCT_TYPE_CODE,
+		T.PRODUCT_TYPE_NAME,
+		T.OUTPUT_NUM,T.PNUM,T.PRNUM,T.FPNUM,T.PRODUCT_LINE_CODE,T.PRODUCT_LINE_NAME
+		FROM (SELECT WS.ID,WS.SHEET_PO,
+		WS.PRODUCT_TYPE_CODE,
+		PT.NAME AS PRODUCT_TYPE_NAME,
+		WS.OUTPUT_NUM,PL.CODE AS PRODUCT_LINE_CODE,PL.NAME AS PRODUCT_LINE_NAME,COUNT(DISTINCT
+		R.ID) AS PNUM,NVL(SUM(case when R.VALID=1 and R.STATUS=0 then 1 else 0
+		end ), 0) AS FPNUM,NVL(SUM(CASE WHEN R.STATUS = -1
+		THEN 1 END), 0) AS PRNUM FROM WORK_SHEET WS
+		INNER JOIN (SELECT P.ID,P.VALID,P.SHEET_PO,PR.PRODUCT_LINE,PR.STATUS
+		FROM PRODUCT P ,PROCESS_RECORD PR
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND PR.STATUS &lt;= 0
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_type_code!=null">
+				AND P.PRODUCT_TYPE_CODE = #{map.product_type_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY P.ID,P.VALID,P.SHEET_PO,PR.PRODUCT_LINE,PR.STATUS) R ON
+		WS.SHEET_PO = R.SHEET_PO
+		INNER JOIN PRODUCT_LINE PL ON PL.CODE = R.PRODUCT_LINE
+		INNER JOIN PRODUCT_TYPE PT ON WS.PRODUCT_TYPE_CODE=PT.CODE
+		GROUP BY WS.ID,WS.SHEET_PO,WS.PRODUCT_TYPE_CODE,
+		WS.OUTPUT_NUM,PL.CODE,PL.NAME,PT.NAME
+		) T ORDER BY T.ID DESC
+	</select>
+
+	<!--品质管控 -->
+	<select id="spsByState" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT P2.SHEET_PO,P2.PRODUCT_LINE AS
+		PRODUCT_LINE_CODE,P2.PROCESS_CODE,PC.NAME AS PROCESS_NAME,NVL(SUM(CASE
+		WHEN P2.STATUS=0 THEN 1 ELSE 0 END ),0) AS PNUM,NVL(SUM(CASE WHEN
+		P2.STATUS =
+		-1
+		THEN 1 ELSE 0 END), 0) AS PRNUM,NVL(SUM(CASE WHEN P2.STATUS =
+		1
+		THEN 1 ELSE 0 END), 0) AS PRRNUM
+		FROM PROCESS PC INNER JOIN
+		(SELECT P.ID,P.SHEET_PO,PR.PRODUCT_LINE,PR.PROCESS_CODE,PR.STATUS
+		FROM PRODUCT P ,PROCESS_RECORD PR,PROCESS PC
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND PC.CODE = PR.PROCESS_CODE
+			<if test="map.sps!=null">
+				AND PC.SPS = #{map.sps,jdbcType=INTEGER}
+			</if>
+			<if test="map.sheet_poes!=null">
+				and P.SHEET_PO IN
+				<foreach close=")" collection="map.sheet_poes"
+					item="listItem" open="(" separator=",">
+					#{listItem}
+				</foreach>
+			</if>
+			<if test="map.product_line_codees!=null">
+				and PR.PRODUCT_LINE IN
+				<foreach close=")" collection="map.product_line_codees"
+					item="listItem" open="(" separator=",">
+					#{listItem}
+				</foreach>
+			</if>
+			<if test="map.process_code!=null">
+				AND PR.PROCESS_CODE = #{map.process_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY P.ID,P.SHEET_PO,PR.PRODUCT_LINE,PR.PROCESS_CODE,PR.STATUS
+		) P2 ON PC.CODE = P2.PROCESS_CODE INNER JOIN WORK_SHEET WS ON P2.SHEET_PO=WS.SHEET_PO
+		GROUP BY P2.SHEET_PO,P2.PRODUCT_LINE,P2.PROCESS_CODE,PC.NAME,WS.CREATE_TIME
+		ORDER BY WS.CREATE_TIME DESC
+	</select>
+
+	<!--产线统计，已工单，工站统计 -->
+	<select id="spsRateByLine" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT WS.SHEET_PO,WS.PRODUCT_TYPE_CODE,PT.NAME AS
+		PRODUCT_TYPE_NAME,T1.PRODUCT_LINE AS
+		PRODUCT_LINE_CODE,T1.PRODUCT_LINE_NAME,NVL(T1.PNUM,0)
+		PNUM,NVL(T2.PNUM,0) AS FPNUM,NVL(T3.PNUM,0) AS FFPNUM
+		FROM WORK_SHEET WS
+		INNER JOIN PRODUCT_TYPE PT ON WS.PRODUCT_TYPE_CODE = PT.CODE
+		INNER JOIN
+		(
+		SELECT P.SHEET_PO,PR.PRODUCT_LINE,COUNT(DISTINCT P.ID) AS PNUM,PL.NAME AS
+		PRODUCT_LINE_NAME
+		FROM PRODUCT P,PROCESS_RECORD PR,PRODUCT_LINE PL
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND PR.PRODUCT_LINE = PL.CODE
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_type_code!=null">
+				AND P.PRODUCT_TYPE_CODE = #{map.product_type_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY P.SHEET_PO,PR.PRODUCT_LINE,PL.NAME
+		) T1 ON WS.SHEET_PO = T1.SHEET_PO
+		LEFT JOIN
+		(SELECT P.SHEET_PO,PR.PRODUCT_LINE,COUNT(DISTINCT P.ID) AS PNUM
+		FROM PRODUCT P,PROCESS_RECORD PR
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND P.VALID=1 AND PR.STATUS =0
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY P.SHEET_PO,PR.PRODUCT_LINE
+		) T2 ON WS.SHEET_PO=T2.SHEET_PO AND T1.PRODUCT_LINE = T2.PRODUCT_LINE
+		LEFT JOIN
+		(SELECT P.SHEET_PO,PR.PRODUCT_LINE,COUNT(DISTINCT P.ID) AS PNUM
+		FROM PRODUCT P,PROCESS_RECORD PR
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND P.VALID=1 AND PR.STATUS =0
+			AND NOT EXISTS (SELECT 1 FROM PROCESS_RECORD WHERE PRODUCT_ID = P.ID AND
+			STATUS=-1)
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		GROUP BY P.SHEET_PO,PR.PRODUCT_LINE
+		) T3 ON WS.SHEET_PO = T3.SHEET_PO AND T1.PRODUCT_LINE = T3.PRODUCT_LINE
+	</select>
+
+
+
+	<!--统计站点产出产品数量 产出追踪 -->
+	<select id="queryCountTimeByState" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT P.SHEET_PO AS SHEETPO,PC.NAME AS PROCESS_NAME,PL.NAME AS
+		PRODUCT_LINE_NAME,P.PRODUCT_TYPE_CODE,PT.NAME AS
+		PRODUCT_TYPE_NAME,COUNT(DISTINCT P.ID) AS PNUM,P.STHH,P.ENHH
+		FROM PROCESS PC,PRODUCT_LINE PL,PRODUCT_TYPE PT,
+		(SELECT
+		P.ID,P.SHEET_PO,P.PRODUCT_TYPE_CODE,PR.PROCESS_CODE,PR.PRODUCT_LINE,trunc(PR.CREATE_TIME,'hh24')
+		STHH,trunc(PR.CREATE_TIME+1/24,'hh24') AS ENHH
+		FROM PRODUCT P,PROCESS_RECORD PR
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID AND PR.STATUS = 0
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_type_code!=null">
+				AND P.PRODUCT_TYPE_CODE = #{map.product_type_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.process_code!=null">
+				AND PR.PROCESS_CODE = #{map.process_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.start_time!=null">
+				AND PR.CREATE_TIME &gt;= #{map.start_time,jdbcType=VARCHAR}
+			</if>
+			<if test="map.end_time!=null">
+				AND PR.CREATE_TIME &lt;= #{map.end_time,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		) P
+		WHERE P.PROCESS_CODE = PC.CODE
+		AND P.PRODUCT_LINE = PL.CODE
+		AND P.PRODUCT_TYPE_CODE = PT.CODE
+		GROUP BY
+		P.SHEET_PO,P.PRODUCT_TYPE_CODE,PC.NAME,PL.NAME,PT.NAME,P.STHH,P.ENHH
+	</select>
+
+	<!--产品记录 -->
+	<select id="queryByProduct" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT P.ID,P.BLSN,P.BBSN,P.CPSN,P.SHEET_PO,PR.PROCESS_CODE,PC.NAME AS
+		PROCESS_NAME,PR.PRODUCT_LINE,PL.NAME AS
+		PRODUCT_LINE_NAME,PT.NAME AS PRODUCT_TYPE_NAME,PR.DESCRIPTION,PR.CREATE_TIME,U.NAME AS USERNAME
+		FROM PRODUCT P,PRODUCT_TYPE PT,PRODUCT_LINE PL,PROCESS
+		PC,PROCESS_RECORD PR,QA_USER U
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = PR.PRODUCT_ID
+			AND P.PRODUCT_TYPE_CODE = PT.CODE
+			AND PR.PROCESS_CODE = PC.CODE
+			AND PR.PRODUCT_LINE = PL.CODE
+			AND PR.USER_ID = U.ID
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.cpsn!=null">
+				AND P.CPSN = #{map.cpsn,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_type_code!=null">
+				AND P.PRODUCT_TYPE_CODE = #{map.product_type_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</select>
+
+
+	<!--产品信息数量 -->
+	<select id="querySninfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		P.ID,P.CPSN,P.BLSN,P.BBSN,P.SHEET_PO,P.PRODUCT_TYPE_CODE,PT.NAME AS
+		PRODUCT_TYPE_NAME,SI.TYPE,SI.SN AS
+		WLSN,SI.CATEGORY,SI.CREATE_TIME
+		FROM PRODUCT P,SN_INFO SI,PRODUCT_TYPE PT
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = SI.PRODUCT_ID
+			AND P.PRODUCT_TYPE_CODE = PT.CODE
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.cpsn!=null">
+				AND P.CPSN = #{map.cpsn,jdbcType=VARCHAR}
+			</if>
+			<if test="map.sn!=null">
+				AND SI.SN = #{map.sn,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</select>
+
+	<!--产品维修信息 -->
+	<select id="queryRepair" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT T1.*,nvl(BC.NAME,'NG') AS BAD_NAME FROM (
+		SELECT P.ID,P.CPSN,P.BLSN,P.BBSN,P.SHEET_PO,P.PRODUCT_TYPE_CODE,PC.CODE AS
+		PROCESS_CODE,PC.NAME AS PROCESS_NAME,RR.BAD_CODE
+		FROM PRODUCT P,REPAIR_RECORD RR,PROCESS_RECORD PR,PROCESS PC
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			AND P.ID = RR.PRODUCT_ID
+			AND P.ID = PR.PRODUCT_ID
+			AND PC.CODE = PR.PROCESS_CODE
+			AND PR.ID = RR.PROCESS_RECORD_ID
+			AND PR.STATUS = -1
+			<if test="map.sheet_po!=null">
+				AND P.SHEET_PO = #{map.sheet_po,jdbcType=VARCHAR}
+			</if>
+			<if test="map.process_code!=null">
+				AND PR.PROCESS_CODE = #{map.process_code,jdbcType=VARCHAR}
+			</if>
+			<if test="map.product_line_code!=null">
+				AND PR.PRODUCT_LINE = #{map.product_line_code,jdbcType=VARCHAR}
+			</if>
+		</trim>
+		) T1 LEFT JOIN BAD_CODE BC ON T1.BAD_CODE = BC.CODE AND
+		T1.PROCESS_CODE = BC.PROCESS_CODE
+	</select>
+	
+	<!-- 数据报表 -->
+	<select id="queryDataStatement" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		po.CPSN,
+		po.BLSN,
+		po.SHEET_PO,
+		po.PRODUCT_TYPE_CODE,
+		pr.PRODUCT_LINE,
+		pro.NAME,
+		decode(pr.STATUS,0,'OK',-1,'NG') as STATUS,
+		pr.DESCRIPTION,
+		pr.CONTENT_JSON,
+		pr.CREATE_TIME
+		FROM
+		PROCESS_RECORD pr
+		INNER JOIN PRODUCT po ON pr.PRODUCT_ID = po. ID
+		INNER JOIN PROCESS pro ON pro.CODE =pr.PROCESS_CODE
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="map.sheetPo!=null">
+				po.SHEET_PO = #{map.sheetPo,jdbcType=VARCHAR}
+			</if>
+			<if test="map.startTime!=null">
+				AND pr.CREATE_TIME &gt;= #{map.startTime,jdbcType=VARCHAR}
+			</if>
+			<if test="map.endTime!=null">
+				AND pr.CREATE_TIME &lt;= #{map.endTime,jdbcType=VARCHAR}
+			</if>
+			<if test="map.processCodes!=null">
+				AND pr.PROCESS_CODE IN
+				<foreach collection="map.processCodes" item="processCode"
+					separator="," open="(" close=")">
+					#{processCode,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+			<if test="map.stasuss!=null">
+				AND pr.STATUS IN
+				<foreach collection="map.stasuss" item="stasus"
+					separator="," open="(" close=")">
+					#{stasus,jdbcType=INTEGER}
+				</foreach>
+			</if>
+			<if test="map.productLineCodes!=null">
+				AND pr.PRODUCT_LINE IN
+				<foreach collection="map.productLineCodes"
+					item="productLineCode" separator="," open="(" close=")">
+					#{productLineCode,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		</trim>
+		ORDER BY
+		pr.PRODUCT_LINE,
+		pr.PROCESS_CODE,
+		pr.CREATE_TIME ASC
+	</select>
+</mapper>

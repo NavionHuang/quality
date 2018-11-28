@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统-产出追溯</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<!--头部查询form-->
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+    <div class="layui-row">
+        <div class="search">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-inline">
+                    <label class="layui-form-label">工单号</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入工号" name="sheetPo"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">型号代码</label>
+                    <div class="layui-input-inline">
+                        <select   name="productType" id="productType">
+                            <option value="">请选择型号代码</option>
+                            <option th:each="productType:${productTypes}" th:value="${productType.code}" th:text="${productType.code}" th:selected="${param.productType !=null and  productType.code eq param.productType[0]}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">线别</label>
+                    <div class="layui-input-inline">
+                        <select name="productLineCode" id="productLineCode">
+                            <option value="">请选择线别</option>
+                            <option th:each="productLine:${productLines}" th:value="${productLine.code}"
+                                    th:text="${productLine.name}"
+                                    th:selected="${param.productLineCode !=null and productLine.code eq param.productLineCode[0]}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">站别</label>
+                    <div class="layui-input-inline">
+                        <select name="processCode" id="processCode">
+                            <option value=""></option>
+                            <option th:each="process:${processes}" th:value="${process.code}"
+                                    th:text="${process.name}"
+                                    th:selected="${param.productCode !=null and process.code eq param.productCode[0]}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">开始日期</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请开始日期" name="startTime" id="startTime"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结束日期</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请结束日期" name="endTime" id="endTime"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" lay-submit="" lay-filter="searchBtn">查询</button>
+                </div>
+            </div>
+        </div>
+        <!--中间表格内容-->
+        <div>
+            <table id="dataTable">
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'table', 'laydate', 'jquery','laypage'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            laydate = layui.laydate;
+        //常规用法
+        laydate.render({
+            elem: '#startTime'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime'
+            ,type: 'datetime'
+        });
+        var tableIns = table.render({
+            id: "dataTable",
+            elem: '#dataTable', //绑定对象
+            size: 'sm',
+            loading: true,
+            page: true,
+            limit: 10,
+            url: /*[[@{/statistics/query_count_time_by_state_data}]]*/ null,//请求地址，默认会绑定参数?page=1&limit=30，分别代表当前页码和呈现的数据量
+            method: 'post',
+            cols: [[ //标题栏
+                { title: '时间',width:'30%',templet:'<div> <span>{{d.STHH}}</span>--<span>{{d.ENHH}}</span>  </div>'}
+                , {field: 'SHEETPO', title: '订单号'}
+                ,{field: 'PRODUCT_TYPE_CODE', title: '型号代码'}
+                , {field: 'PRODUCT_LINE_NAME', title: '线别'}
+                , {field: 'PROCESS_NAME', title: '站别'}
+                , {field: 'PNUM', title: '产出数量'}
+            ]], response: {
+                statusName: 'code' //数据状态的字段名称，默认：code
+                , statusCode: 200 //成功的状态码，默认：0
+                , msgName: 'msg' //状态信息的字段名称，默认：msg
+                , countName: 'count' //数据总数的字段名称，默认：count
+                , dataName: 'data' //数据列表的字段名称，默认：data
+            }
+        });
+
+        //监听提交，查询
+        form.on('submit(searchBtn)', function (obj) {
+            var field = obj.field;
+            if (field['sheetPo'] == '') field['sheetPo'] = undefined;
+            if (field['productType'] == '') field['productType'] = undefined;
+            if (field['productLineCode'] == '') field['productLineCode'] = undefined;
+            if (field['processCode'] == '') field['processCode'] = undefined;
+            if (field['startTime'] == '') field['startTime'] = undefined;
+            if (field['endTime'] == '') field['endTime'] = undefined;
+            tableIns.reload({
+                where: field
+            });
+            return false;
+        });
+
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

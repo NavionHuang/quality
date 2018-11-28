@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IQaRoleDao">
+    <cache eviction="LRU" flushInterval="600000" size="1024" readOnly="true"/>
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.QaRole">
+        <id column="id" jdbcType="DECIMAL" property="id"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="valid" jdbcType="DECIMAL" property="valid"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    id as id, code as code, name as name, 
+    valid as valid, description as description
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.QaRoleGeneratedCriteria"
+            resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from QA_ROLE QA_ROLE
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from QA_ROLE QA_ROLE
+        where id = #{id,jdbcType=DECIMAL}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+    delete from QA_ROLE
+    where id = #{id,jdbcType=DECIMAL}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.QaRoleGeneratedCriteria">
+        delete from QA_ROLE QA_ROLE
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.QaRole">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            select QA_ROLE_SEQ.nextval as Id from dual
+        </selectKey>
+    insert into QA_ROLE (id, code, name, 
+      valid, description)
+    values (#{id,jdbcType=DECIMAL}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{valid,jdbcType=DECIMAL}, #{description,jdbcType=VARCHAR})
+  </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.QaRole">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            select QA_ROLE_SEQ.nextval as Id from dual
+        </selectKey>
+        insert into QA_ROLE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="valid != null">
+                valid,
+            </if>
+            <if test="description != null">
+                description,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=DECIMAL},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=DECIMAL},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.QaRoleGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from QA_ROLE QA_ROLE
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update QA_ROLE QA_ROLE
+        <set>
+            <if test="record.id != null">
+                id = #{record.id,jdbcType=DECIMAL},
+            </if>
+            <if test="record.code != null">
+                code = #{record.code,jdbcType=VARCHAR},
+            </if>
+            <if test="record.name != null">
+                name = #{record.name,jdbcType=VARCHAR},
+            </if>
+            <if test="record.valid != null">
+                valid = #{record.valid,jdbcType=DECIMAL},
+            </if>
+            <if test="record.description != null">
+                description = #{record.description,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update QA_ROLE QA_ROLE
+        set id = #{record.id,jdbcType=DECIMAL},
+        code = #{record.code,jdbcType=VARCHAR},
+        name = #{record.name,jdbcType=VARCHAR},
+        valid = #{record.valid,jdbcType=DECIMAL},
+        description = #{record.description,jdbcType=VARCHAR}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lifesense.quality.domain.QaRole">
+        update QA_ROLE
+        <set>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                valid = #{valid,jdbcType=DECIMAL},
+            </if>
+            <if test="description != null">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=DECIMAL}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lifesense.quality.domain.QaRole">
+    update QA_ROLE
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      valid = #{valid,jdbcType=DECIMAL},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=DECIMAL}
+  </update>
+
+    <select id="count" parameterType="com.lifesense.quality.domain.QaRole" resultType="java.lang.Integer">
+        select count(*)
+        from Qa_Role
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and id = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.code != null">
+                and code = #{record.code,jdbcType=VARCHAR}
+            </if>
+            <if test="record.name != null">
+                and name = #{record.name,jdbcType=VARCHAR}
+            </if>
+            <if test="record.valid != null">
+                and valid = #{record.valid,jdbcType=DECIMAL}
+            </if>
+            <if test="record.description != null">
+                and description = #{record.description,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.QaRole" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from Qa_Role
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and id = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.code != null">
+                and code = #{record.code,jdbcType=VARCHAR}
+            </if>
+            <if test="record.name != null">
+                and name = #{record.name,jdbcType=VARCHAR}
+            </if>
+            <if test="record.valid != null">
+                and valid = #{record.valid,jdbcType=DECIMAL}
+            </if>
+            <if test="record.description != null">
+                and description = #{record.description,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+</mapper>

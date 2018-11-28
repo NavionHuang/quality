@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>品质管理系统-物料追溯</title>
+    <link rel="stylesheet" type="text/css" href="/layui/css/layui.css" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" href="/css/iframe.css" th:href="@{/css/iframe.css}"/>
+    <script type="text/javascript" src="/layui/layui.js" th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<!--头部查询form-->
+<div class="layui-fluid" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')">
+    <div class="layui-row">
+        <div class="search">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-inline">
+                    <label class="layui-form-label">工单号</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入工号" name="sheetPo" id="sheetPo" th:value="(${param.sheetPo}?${param.sheetPo[0]}:'')"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">产品SN</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入产品SN" name="cpsn" id="cpsn" th:value="(${param.cpsn}?${param.cpsn[0]}:'')"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">物料SN</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" type="text" placeholder="请输入物料SN" name="sn" id="sn" th:value="(${param.sn}?${param.sn[0]}:'')"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" lay-submit="" lay-filter="searchBtn">查询</button>
+                </div>
+            </div>
+        </div>
+        <!--中间表格内容-->
+        <div>
+            <table id="dataTable" lay-filter="dataTable" class="layui-table">
+                <thead>
+                <tr>
+                    <th lay-data="{field:'no'}">序号</th>
+                    <th lay-data="{field:'cpsn'}">产品SN</th>
+                    <th lay-data="{field:'ddh'}">订单号</th>
+                    <th lay-data="{field:'scbh'}">生产型号</th>
+                    <th lay-data="{field:'wllx'}">物料类型</th>
+                    <th lay-data="{field:'wlbh'}">物料编号</th>
+                    <th lay-data="{field:'lrsj'}">录入时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d,iterStat:${page.data}" th:unless="${#lists.isEmpty(d['snInfo'])}">
+                    <td th:text="${iterStat.count}">序号</td>
+                    <td th:text="${d.cpsn}">产品SN</td>
+                    <td th:text="${d.sheetPo}">订单号</td>
+                    <td th:text="${d.productTypeCode}">型号代码</td>
+                    <td colspan="3">
+                        <table width="100%">
+                            <tr th:each="s:${d['snInfo']}">
+                                <td th:text="${s.category}" width="30%">物料类型</td>
+                                <td th:text="${s.sn}" width="30%">物料编号</td>
+                                <td th:text="${#dates.format(s.createTime,'yyyy-MM-dd HH:mm:ss')}" width="40%">录入时间</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div id="pageDiv"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /* <![CDATA[*/
+    layui.config({
+        base: /*[[@{/js/}]]*/ null
+    }).use(['form', 'table', 'laydate', 'jquery','laypage'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery,
+            laydate = layui.laydate;
+        var laypage = layui.laypage;
+
+        var page = 1;
+        //完整功能
+        laypage.render({
+            elem: 'pageDiv'
+            ,count: /*[[${page.count}]]*/0
+            ,layout: [ 'prev', 'page', 'next', 'limit','count', 'skip']
+            ,curr: /*[[${param.page}]]*/1
+            ,jump: function(obj,first){
+                page = obj.curr;
+                if (!first) {
+                    var sheetPo = $("#sheetPo").val();
+                    var cpsn = $("#cpsn").val();
+                    var sn = $("#sn").val();
+                    var path = /*[[@{/statistics/query_sninfo.html}]]*/"";
+                    location.href = path + "?page=" + page + "&sheetPo=" + encodeURIComponent(sheetPo)+ "&cpsn=" + encodeURIComponent(cpsn)+ "&sn=" + encodeURIComponent(sn);
+                }
+            }
+        });
+
+        //监听提交，查询
+        form.on('submit(searchBtn)', function (obj) {
+            var field = obj.field;
+            var sheetPo = field['sheetPo'];
+            var cpsn = field['cpsn'];
+            var sn = field['sn'];
+            var path = /*[[@{/statistics/query_sninfo.html}]]*/"";
+            location.href = path + "?page=1&sheetPo=" + encodeURIComponent(sheetPo)+ "&cpsn=" + encodeURIComponent(cpsn)+ "&sn=" + encodeURIComponent(sn);
+            return false;
+            return false;
+        });
+
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Insert title here</title>
+</head>
+<body>
+	<audio id="ddsound" src="/f.wav" align="center" border="0" width="1"
+		height="1"></audio>
+	<input type="button" id="btn" value="声音" onclick="playSound()" />
+	<input type="button" id="btn22" value="停止" onclick="playSop()" />
+	<script type="text/javascript" th:inline="javascript">
+		function playSound() {
+			document.getElementById("ddsound").play();
+		}
+
+		function playSop() {
+			document.getElementById("ddsound").pause();
+		}
+	</script>
+</body>
+</html>

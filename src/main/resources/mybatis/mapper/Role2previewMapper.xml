@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IRole2previewDao">
+  <cache eviction="LRU" flushInterval="600000" size="1024" readOnly="true"/>
+  <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.Role2preview">
+    <result column="ROLE_CODE" jdbcType="VARCHAR" property="roleCode" />
+    <result column="PREVIEW_CODE" jdbcType="VARCHAR" property="previewCode" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ROLE2PREVIEW.ROLE_CODE as ROLE_CODE, ROLE2PREVIEW.PREVIEW_CODE as PREVIEW_CODE
+  </sql>
+  <select id="selectByExample" parameterType="com.lifesense.quality.criteria.Role2previewGeneratedCriteria" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ROLE2PREVIEW ROLE2PREVIEW
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.Role2previewGeneratedCriteria">
+    delete from ROLE2PREVIEW ROLE2PREVIEW
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.lifesense.quality.domain.Role2preview">
+    insert into ROLE2PREVIEW (ROLE_CODE, PREVIEW_CODE)
+    values (#{roleCode,jdbcType=VARCHAR}, #{previewCode,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lifesense.quality.domain.Role2preview">
+    insert into ROLE2PREVIEW
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleCode != null">
+        ROLE_CODE,
+      </if>
+      <if test="previewCode != null">
+        PREVIEW_CODE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleCode != null">
+        #{roleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="previewCode != null">
+        #{previewCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.lifesense.quality.criteria.Role2previewGeneratedCriteria" resultType="java.lang.Long">
+    select count(*) from ROLE2PREVIEW ROLE2PREVIEW
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update ROLE2PREVIEW ROLE2PREVIEW
+    <set>
+      <if test="record.roleCode != null">
+        ROLE2PREVIEW.ROLE_CODE = #{record.roleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.previewCode != null">
+        ROLE2PREVIEW.PREVIEW_CODE = #{record.previewCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update ROLE2PREVIEW ROLE2PREVIEW
+    set ROLE2PREVIEW.ROLE_CODE = #{record.roleCode,jdbcType=VARCHAR},
+      ROLE2PREVIEW.PREVIEW_CODE = #{record.previewCode,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+
+</mapper>

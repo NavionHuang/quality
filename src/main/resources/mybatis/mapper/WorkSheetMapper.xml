@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IWorkSheetDao">
+    <cache eviction="LRU"  size="1024" readOnly="true"/>
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.WorkSheet">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="SHEET_NO" jdbcType="VARCHAR" property="sheetNo"/>
+        <result column="SHEET_PO" jdbcType="VARCHAR" property="sheetPo"/>
+        <result column="PRODUCT_NO" jdbcType="VARCHAR" property="productNo"/>
+        <result column="PRODUCT_TYPE_CODE" jdbcType="VARCHAR" property="productTypeCode"/>
+        <result column="TYPE" jdbcType="BIGINT" property="type"/>
+        <result column="OUTPUT_NUM" jdbcType="BIGINT" property="outputNum"/>
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime"/>
+        <result column="VALID" jdbcType="BIGINT" property="valid"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="CREATE_USER" jdbcType="VARCHAR" property="createUser"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    ID, SHEET_NO,SHEET_PO,PRODUCT_NO,PRODUCT_TYPE_CODE,TYPE, OUTPUT_NUM, START_TIME, END_TIME, VALID, CREATE_TIME,
+    CREATE_USER
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.WorkSheetGeneratedCriteria"
+            resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from WORK_SHEET
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from WORK_SHEET
+        where ID = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+    delete from WORK_SHEET
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.WorkSheetGeneratedCriteria">
+        delete from WORK_SHEET
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.WorkSheet" >
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT WORK_SHEET_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into WORK_SHEET (id,SHEET_NO, SHEET_PO,PRODUCT_NO,PRODUCT_TYPE_CODE, TYPE,
+        OUTPUT_NUM, START_TIME, END_TIME,
+        VALID, CREATE_TIME, CREATE_USER
+        )
+        values
+        (#{id,jdbcType=BIGINT},#{sheetNo,jdbcType=VARCHAR},#{sheetPo,jdbcType=VARCHAR},#{productNo,jdbcType=VARCHAR},
+        #{productTypeCode,jdbcType=VARCHAR}, #{type,jdbcType=BIGINT},
+        #{outputNum,jdbcType=BIGINT}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
+        #{valid,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{createUser,jdbcType=VARCHAR}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.WorkSheet" >
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT WORK_SHEET_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into WORK_SHEET
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="sheetNo != null">
+                SHEET_NO,
+            </if>
+            <if test="sheetPo != null">
+                sheet_Po,
+            </if>
+            <if test="productNo != null">
+                product_No,
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_CODE,
+            </if>
+            <if test="type != null">
+                TYPE,
+            </if>
+            <if test="outputNum != null">
+                OUTPUT_NUM,
+            </if>
+            <if test="startTime != null">
+                START_TIME,
+            </if>
+            <if test="endTime != null">
+                END_TIME,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="createUser != null">
+                CREATE_USER,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="sheetNo != null">
+                #{sheetNo,jdbcType=VARCHAR},
+            </if>
+            <if test="sheetPo != null">
+                #{sheetPo,jdbcType=VARCHAR},
+            </if>
+            <if test="productNo != null">
+                #{productNo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=BIGINT},
+            </if>
+            <if test="outputNum != null">
+                #{outputNum,jdbcType=BIGINT},
+            </if>
+            <if test="startTime != null">
+                #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createUser != null">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.WorkSheetGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from WORK_SHEET
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update WORK_SHEET
+        <set>
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=BIGINT},
+            </if>
+            <if test="record.sheetNo != null">
+                SHEET_NO = #{record.sheetNo,jdbcType=VARCHAR},
+            </if>
+            <if test="record.sheetPo != null">
+                SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR},
+            </if>
+            <if test="record.productNo != null">
+                product_No = #{record.productNo,jdbcType=VARCHAR},
+            </if>
+            <if test="record.productTypeCode != null">
+                PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.type != null">
+                TYPE = #{record.type,jdbcType=BIGINT},
+            </if>
+            <if test="record.outputNum != null">
+                OUTPUT_NUM = #{record.outputNum,jdbcType=BIGINT},
+            </if>
+            <if test="record.startTime != null">
+                START_TIME = #{record.startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.endTime != null">
+                END_TIME = #{record.endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.valid != null">
+                VALID = #{record.valid,jdbcType=BIGINT},
+            </if>
+            <if test="record.createTime != null">
+                CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.createUser != null">
+                CREATE_USER = #{record.createUser,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update WORK_SHEET
+        set ID = #{record.id,jdbcType=BIGINT},
+        SHEET_NO = #{record.sheetNo,jdbcType=VARCHAR},
+        PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR},
+        TYPE = #{record.type,jdbcType=BIGINT},
+        OUTPUT_NUM = #{record.outputNum,jdbcType=BIGINT},
+        START_TIME = #{record.startTime,jdbcType=TIMESTAMP},
+        END_TIME = #{record.endTime,jdbcType=TIMESTAMP},
+        VALID = #{record.valid,jdbcType=BIGINT},
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+        CREATE_USER = #{record.createUser,jdbcType=VARCHAR}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lifesense.quality.domain.WorkSheet">
+        update WORK_SHEET
+        <set>
+            <if test="sheetNo != null">
+                SHEET_NO = #{sheetNo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_CODE = #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                TYPE = #{type,jdbcType=BIGINT},
+            </if>
+            <if test="outputNum != null">
+                OUTPUT_NUM = #{outputNum,jdbcType=BIGINT},
+            </if>
+            <if test="startTime != null">
+                START_TIME = #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                END_TIME = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createUser != null">
+                CREATE_USER = #{createUser,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lifesense.quality.domain.WorkSheet">
+    update WORK_SHEET
+    set SHEET_NO = #{sheetNo,jdbcType=VARCHAR},
+      PRODUCT_TYPE_CODE = #{productTypeCode,jdbcType=VARCHAR},
+      TYPE = #{type,jdbcType=BIGINT},
+      OUTPUT_NUM = #{outputNum,jdbcType=BIGINT},
+      START_TIME = #{startTime,jdbcType=TIMESTAMP},
+      END_TIME = #{endTime,jdbcType=TIMESTAMP},
+      VALID = #{valid,jdbcType=BIGINT},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      CREATE_USER = #{createUser,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+    <select id="count" parameterType="com.lifesense.quality.domain.WorkSheet" resultType="java.lang.Integer">
+        select count(*)
+        from Work_Sheet
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.sheetNo != null">
+                and SHEET_NO = #{record.sheetNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.sheetPo != null">
+                and SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productNo != null">
+                and product_No = #{record.productNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productTypeCode != null">
+                and PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.type != null">
+                and TYPE = #{record.type,jdbcType=BIGINT}
+            </if>
+            <if test="record.outputNum != null">
+                and OUTPUT_NUM = #{record.outputNum,jdbcType=BIGINT}
+            </if>
+            <if test="record.startTime != null">
+                and START_TIME = #{record.startTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.endTime != null">
+                and END_TIME = #{record.endTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.valid != null">
+                and VALID = #{record.valid,jdbcType=BIGINT}
+            </if>
+            <if test="record.createTime != null">
+                and CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.createUser != null">
+                and CREATE_USER = #{record.createUser,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.WorkSheet"
+            resultType="com.lifesense.quality.domain.WorkSheet">
+        select
+        T1.ID as id, T1.SHEET_NO as sheetNo,T1.SHEET_PO as sheetPo,T1.PRODUCT_NO as productNo,T1.PRODUCT_TYPE_CODE as
+        productTypeCode,
+        T1.TYPE as type, T1.OUTPUT_NUM as outputNum,
+        T1.START_TIME as startTime, T1.END_TIME as endTime, T1.VALID as valid, T1.CREATE_TIME as createTime,
+        T1.CREATE_USER,T2.NAME AS productTypeName
+        from Work_Sheet T1,PRODUCT_TYPE T2
+        <trim prefix="where" prefixOverrides="and | or">
+            AND T1.PRODUCT_TYPE_CODE = T2.CODE
+            <if test="record.id != null">
+                and T1.ID = #{record.id,jdbcType=BIGINT}
+            </if>
+            <if test="record.sheetNo != null">
+                and T1.SHEET_NO = #{record.sheetNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.sheetPo != null">
+                and T1.SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productNo != null">
+                and T1.product_No = #{record.productNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productTypeCode != null">
+                and T1.PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.type != null">
+                and T1.TYPE = #{record.type,jdbcType=BIGINT}
+            </if>
+            <if test="record.outputNum != null">
+                and T1.OUTPUT_NUM = #{record.outputNum,jdbcType=BIGINT}
+            </if>
+            <if test="record.startTime != null">
+                and T1.START_TIME = #{record.startTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.endTime != null">
+                and T1.END_TIME = #{record.endTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.valid != null">
+                and T1.VALID = #{record.valid,jdbcType=BIGINT}
+            </if>
+            <if test="record.createTime != null">
+                and T1.CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.createUser != null">
+                and T1.CREATE_USER = #{record.createUser,jdbcType=VARCHAR}
+            </if>
+        </trim>
+        ORDER BY T1.CREATE_TIME DESC
+    </select>
+</mapper>

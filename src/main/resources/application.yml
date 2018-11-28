@@ -1,0 +1,71 @@
+
+spring :
+      jackson :
+          time-zone : GMT+8
+          date-format : yyyy-MM-dd HH:mm:ss
+          default-property-inclusion: non_null
+      http:
+          multipart:
+                   enabled: true
+                   maxFileSize: 10Mb
+   #环境
+      profiles:
+          active: prod
+      #渲染器thymeleaf
+      thymeleaf:
+          # Enable template caching.
+          cache: false
+          # Check that the templates location exists.
+          check-template-location: true
+          # Content-Type value.
+          content-type: text/html
+          # Enable MVC Thymeleaf view resolution.
+          enabled: true
+          # Template encoding.
+          encoding: UTF-8
+          # Comma-separated list of view names that should be excluded from resolution.
+          excluded-view-names:
+          # Template mode to be applied to templates. See also StandardTemplateModeHandlers.
+          mode: HTML5
+          # Prefix that gets prepended to view names when building a URL.
+          prefix: classpath:/templates/
+          # Suffix that gets appended to view names when building a URL.
+          suffix: .html
+           # Order of
+          template-resolver-order:
+      datasource:
+             type: com.alibaba.druid.pool.DruidDataSource
+             driverClassName: oracle.jdbc.driver.OracleDriver
+             #-------------------------- 
+             # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+             filters: stat,wall,log4j
+             # 初始化大小，最小，最大
+             initialSize: 5
+             minIdle: 10
+             maxActive: 50
+             # 配置获取连接等待超时的时间
+             maxWait: 60000
+             # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒   
+             timeBetweenEvictionRunsMillis: 60000
+             # 配置一个连接在池中最小生存的时间，单位是毫秒   
+             minEvictableIdleTimeMillis: 300000
+             validationQuery: SELECT 1 FROM DUAL
+             testWhileIdle: true
+             testOnBorrow: false
+             testOnReturn: false
+             # 打开PSCache，并且指定每个连接上PSCache的大小   
+             poolPreparedStatements: true
+             maxPoolPreparedStatementPerConnectionSize: 20
+
+#mybatis配置
+mybatis:
+    typeAliasesPackage: com.lifesense.quality.domain
+    mapperLocations: classpath:mybatis/mapper/*.xml
+
+#pagehelper分页插件
+pagehelper:
+    helperDialect: oracle
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+

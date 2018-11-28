@@ -1,0 +1,594 @@
+/*==============================================================*/
+/* DBMS name:      ORACLE Version 11g                           */
+/* Created on:     2018/4/30 15:06:25                           */
+/*==============================================================*/
+
+
+DROP TABLE BAD_CODE CASCADE CONSTRAINTS;
+
+DROP TABLE PROCESS CASCADE CONSTRAINTS;
+
+DROP TABLE PROCESS_FLOW CASCADE CONSTRAINTS;
+
+DROP INDEX I_PROCESS_RECORD_PROCESS_CODE;
+
+DROP INDEX I_PROCESS_RECORD_PRODUCT_ID;
+
+DROP TABLE PROCESS_RECORD CASCADE CONSTRAINTS;
+
+DROP INDEX I_PRODUCT_BBSN;
+
+DROP INDEX I_PRODUCT_BLSN;
+
+DROP INDEX I_PRODUCT_CPSN;
+
+DROP TABLE PRODUCT CASCADE CONSTRAINTS;
+
+DROP TABLE PRODUCT_LINE CASCADE CONSTRAINTS;
+
+DROP TABLE PRODUCT_TYPE CASCADE CONSTRAINTS;
+
+DROP TABLE QA_USER CASCADE CONSTRAINTS;
+
+DROP TABLE REPAIR_RECORD CASCADE CONSTRAINTS;
+
+DROP TABLE QA_ROLE CASCADE CONSTRAINTS;
+
+DROP TABLE SN_INFO CASCADE CONSTRAINTS;
+
+DROP TABLE SYS_LOG CASCADE CONSTRAINTS;
+
+DROP TABLE WORK_SHEET CASCADE CONSTRAINTS;
+
+DROP TABLE QA_PREVIEW CASCADE CONSTRAINTS;
+
+DROP TABLE ROLE2PREVIEW CASCADE CONSTRAINTS;
+
+DROP TABLE USER2ROLE CASCADE CONSTRAINTS;
+
+
+CREATE SEQUENCE BAD_CODE_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE PROCESS_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE PROCESS_RECORD_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE PRODUCT_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE PRODUCT_LINE_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE PRODUCT_TYPE_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE QA_USER_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE REPAIR_RECORD_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE QA_ROLE_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE SYS_LOG_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE WORK_SHEET_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE BOM_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+CREATE SEQUENCE SN_INFO_SEQ INCREMENT BY 1 START WITH 1 NOMAXVALUE NOCYCLE CACHE 10;
+
+/*==============================================================*/
+/* Table: BAD_CODE                                              */
+/*==============================================================*/
+CREATE TABLE BAD_CODE
+(
+  ID           NUMBER(11) NOT NULL,
+  PROCESS_CODE VARCHAR2(80),
+  CODE         VARCHAR2(80),
+  NAME         VARCHAR2(200),
+  REMARK       VARCHAR2(400),
+  VALID        NUMBER DEFAULT 0,
+  CONSTRAINT PK_BAD_CODE PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_BAD_CODE_BAD_CODE UNIQUE (PROCESS_CODE, CODE)
+);
+
+COMMENT ON TABLE BAD_CODE IS'不良代码';
+COMMENT ON COLUMN BAD_CODE.ID IS'主键';
+COMMENT ON COLUMN BAD_CODE.PROCESS_CODE IS'站别代码';
+COMMENT ON COLUMN BAD_CODE.CODE IS'不良代码';
+COMMENT ON COLUMN BAD_CODE.NAME IS'备注内容';
+COMMENT ON COLUMN BAD_CODE.REMARK IS'备注内容';
+COMMENT ON COLUMN BAD_CODE.VALID IS'是否有效，0有效，1无效';
+
+/*==============================================================*/
+/* Table: PROCESS                                               */
+/*==============================================================*/
+CREATE TABLE PROCESS
+(
+  ID       NUMBER(20) DEFAULT NULL NOT NULL,
+  TYPE     NUMBER(20),
+  CODE     VARCHAR2(80),
+  NAME     VARCHAR2(80),
+  SNTREGEX VARCHAR2(80),
+  REMARK   VARCHAR2(80),
+  VALID    NUMBER DEFAULT 0,
+  CONSTRAINT PK_PROCESS PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_PROCESS_TYPE_CO_PROCESS UNIQUE (TYPE, CODE)
+);
+
+COMMENT ON TABLE PROCESS IS'站别';
+
+COMMENT ON COLUMN PROCESS.ID IS'主键';
+
+COMMENT ON COLUMN PROCESS.TYPE IS'站别类型（0,process,1,repair）';
+
+COMMENT ON COLUMN PROCESS.CODE IS'站别代码';
+
+COMMENT ON COLUMN PROCESS.NAME IS'站别名称';
+
+COMMENT ON COLUMN PROCESS.REMARK IS'备注内容';
+
+COMMENT ON COLUMN PROCESS.VALID IS'是否有效，0有效，1无效';
+
+/*==============================================================*/
+/* Table: PROCESS_FLOW                                          */
+/*==============================================================*/
+CREATE TABLE PROCESS_FLOW
+(
+  PRODUCT_TYPE_CODE VARCHAR2(80) NOT NULL,
+  PROCESS_CODE        VARCHAR2(80) NOT NULL,
+  NEXT_PROCESS_CODE  VARCHAR2(80),
+  REPAIR_PROCESS_CODE       VARCHAR2(80)
+);
+
+COMMENT ON TABLE PROCESS_FLOW IS'站别流程';
+
+COMMENT ON COLUMN PROCESS_FLOW.PRODUCT_TYPE_CODE IS'产品类型';
+
+COMMENT ON COLUMN PROCESS_FLOW.PROCESS_CODE IS'站别代码';
+
+COMMENT ON COLUMN PROCESS_FLOW.REPAIR_PROCESS_CODE IS'维修站别code';
+
+COMMENT ON COLUMN PROCESS_FLOW.NEXT_PROCESS_CODE IS'下一工作站';
+
+
+/*==============================================================*/
+/* Table: PROCESS_RECORD                                        */
+/*==============================================================*/
+CREATE TABLE PROCESS_RECORD
+(
+  ID             NUMBER(20) DEFAULT NULL NOT NULL,
+  PRODUCT_ID   NUMBER(11),
+  PRODUCT_LINE   VARCHAR2(80),
+  PROCESS_CODE   VARCHAR2(80),
+  STATUS     VARCHAR2(80),
+  USER_ID     NUMBER(11),
+  DESCRIPTION  VARCHAR(200),
+  CONTENT_JSON VARCHAR2(1000),
+  CREATE_TIME    DATE DEFAULT SYSDATE,
+  CONSTRAINT PK_PROCESS_RECORD PRIMARY KEY (ID)
+);
+COMMENT ON TABLE PROCESS_RECORD IS'测试记录';
+
+COMMENT ON COLUMN PROCESS_RECORD.ID IS'主键';
+
+COMMENT ON COLUMN PROCESS_RECORD.PRODUCT_ID IS'产品id';
+
+COMMENT ON COLUMN PROCESS_RECORD.PRODUCT_LINE IS'线别';
+
+COMMENT ON COLUMN PROCESS_RECORD.PROCESS_CODE IS'站别代号';
+
+COMMENT ON COLUMN PROCESS_RECORD.status IS'状态，0OK，1其他，-1NG';
+
+COMMENT ON COLUMN PROCESS_RECORD.user_id IS'用户Id';
+
+COMMENT ON COLUMN PROCESS_RECORD.description IS'描述';
+
+COMMENT ON COLUMN PROCESS_RECORD.content_json IS'测试内容json';
+
+COMMENT ON COLUMN PROCESS_RECORD.CREATE_TIME IS'创建时间';
+
+/*==============================================================*/
+/* Index: i_process_record_product_id                         */
+/*==============================================================*/
+CREATE INDEX I_PROCESS_RECORD_PRODUCT_ID  ON PROCESS_RECORD(PRODUCT_ID);
+
+/*==============================================================*/
+/* Index: i_process_record_process_code                       */
+/*==============================================================*/
+CREATE INDEX I_PROCESS_RECORD_PROCESS_CODE  ON PROCESS_RECORD (PROCESS_CODE ASC);
+
+/*==============================================================*/
+/* Table: PRODUCT                                               */
+/*==============================================================*/
+CREATE TABLE PRODUCT
+(
+  ID                  NUMBER(20) DEFAULT NULL NOT NULL,
+  SHEET_PO            VARCHAR2(80),
+  PRODUCT_NO          VARCHAR2(80),
+  PRODUCT_TYPE_CODE VARCHAR2(80),
+  CPSN                VARCHAR2(80),
+  BLSN                VARCHAR2(80),
+  BBSN                VARCHAR2(80),
+  CGQSN               VARCHAR2(80),
+  SMSSN               VARCHAR2(80),
+  BXKSN               VARCHAR2(80),
+  CHSN                VARCHAR2(80),
+  VALID               NUMBER(1),
+  CREATE_TIME         DATE,
+  MODIFY_TIME         DATE DEFAULT SYSDATE,
+  CONSTRAINT PK_PRODUCT PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_PRODUCT_CPSN_PRODUCT UNIQUE (CPSN),
+  CONSTRAINT AK_UQ_PRODUCT_BLSN_PRODUCT UNIQUE (BLSN),
+  CONSTRAINT AK_QU_PRODUCT_BBSN_PRODUCT UNIQUE (BBSN)
+);
+
+COMMENT ON TABLE PRODUCT IS'产品';
+
+COMMENT ON COLUMN PRODUCT.ID IS'主键';
+
+COMMENT ON COLUMN PRODUCT.SHEET_NO IS'工单号';
+COMMENT ON COLUMN PRODUCT.PRODUCT_NO IS'产品编号';
+
+COMMENT ON COLUMN PRODUCT.PRODUCT_TYPE_CODE IS'产品类型';
+
+COMMENT ON COLUMN PRODUCT.CPSN IS'产品SN码';
+
+COMMENT ON COLUMN PRODUCT.BLSN IS'玻璃SN';
+
+COMMENT ON COLUMN PRODUCT.BBSN IS'板板sn';
+
+COMMENT ON COLUMN PRODUCT.CGQSN IS'传感器';
+
+COMMENT ON COLUMN PRODUCT.SMSSN IS'说明书sn';
+
+COMMENT ON COLUMN PRODUCT.BXKSN IS'保修卡sn';
+
+COMMENT ON COLUMN PRODUCT.CHSN IS'彩盒sn';
+
+COMMENT ON COLUMN PRODUCT.VALID IS'是否有效（0有效，1无效）';
+
+COMMENT ON COLUMN PRODUCT.CREATE_TIME IS'创建时间';
+
+COMMENT ON COLUMN PRODUCT.MODIFY_TIME IS'修改时间';
+
+
+/*==============================================================*/
+/* Table: PRODUCT_LINE                                          */
+/*==============================================================*/
+CREATE TABLE PRODUCT_LINE
+(
+  ID     NUMBER(20) DEFAULT NULL NOT NULL,
+  CODE   VARCHAR2(80),
+  NAME   VARCHAR2(200),
+  REMARK VARCHAR2(400),
+  VALID  NUMBER DEFAULT 0,
+  CONSTRAINT PK_PRODUCT_LINE PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_PRODUCT_LINE_PRODUCT_ UNIQUE (CODE)
+);
+
+COMMENT ON TABLE PRODUCT_LINE IS'线别';
+
+COMMENT ON COLUMN PRODUCT_LINE.ID IS'主键';
+
+COMMENT ON COLUMN PRODUCT_LINE.CODE IS'线别代码';
+
+COMMENT ON COLUMN PRODUCT_LINE.NAME IS'线别名称';
+
+COMMENT ON COLUMN PRODUCT_LINE.REMARK IS'备注内容';
+
+COMMENT ON COLUMN PRODUCT_LINE.VALID IS'是否有效，0有效，1无效';
+
+/*==============================================================*/
+/* Table: PRODUCT_TYPE                                          */
+/*==============================================================*/
+CREATE TABLE PRODUCT_TYPE
+(
+  ID    NUMBER(20) DEFAULT NULL NOT NULL,
+  CODE  VARCHAR2(80)            NOT NULL,
+  NAME  VARCHAR2(80),
+  VALID NUMBER(1),
+  CONSTRAINT PK_PRODUCT_TYPE PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_PRODUCT_TYPE_PRODUCT_ UNIQUE (CODE)
+);
+
+COMMENT ON TABLE PRODUCT_TYPE IS'备注内容';
+
+COMMENT ON COLUMN PRODUCT_TYPE.ID IS'主键';
+
+COMMENT ON COLUMN PRODUCT_TYPE.CODE IS'产品型号代码';
+
+COMMENT ON COLUMN PRODUCT_TYPE.NAME IS'产品名称';
+
+COMMENT ON COLUMN PRODUCT_TYPE.VALID IS'是否有效，0有效，1无效';
+
+/*==============================================================*/
+/* Table: QA_USER                                               */
+/*==============================================================*/
+CREATE TABLE QA_USER
+(
+  ID             NUMBER(20) DEFAULT NULL NOT NULL,
+  ACCOUNT        VARCHAR2(80),
+  PASSWORD       VARCHAR2(80),
+  CODE           VARCHAR2(80),
+  NAME           VARCHAR2(80),
+  PROCESS_CODE   VARCHAR2(80),
+  PROCESS_SIGN   NUMBER DEFAULT 0,
+  VALID          NUMBER DEFAULT 0,
+  CREATE_USER_ID NUMBER(20),
+  CREATE_TIME    DATE   DEFAULT SYSDATE,
+  MODIFY_TIME    DATE,
+  CONSTRAINT PK_QA_USER PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_OA_USER_QA_USER UNIQUE (ACCOUNT)
+);
+
+COMMENT ON TABLE QA_USER IS'用户';
+
+COMMENT ON COLUMN QA_USER.ID IS'主键';
+
+COMMENT ON COLUMN QA_USER.ACCOUNT IS'账户';
+
+COMMENT ON COLUMN QA_USER.PASSWORD IS'密码';
+
+COMMENT ON COLUMN QA_USER.CODE IS'工号';
+
+COMMENT ON COLUMN QA_USER.NAME IS'用户名称';
+
+COMMENT ON COLUMN QA_USER.PROCESS_CODE IS'站别代码';
+
+COMMENT ON COLUMN QA_USER.PROCESS_SIGN IS'是否作业员,默认0是，1否';
+
+COMMENT ON COLUMN QA_USER.VALID IS'是否有效，0有效，1无效';
+
+COMMENT ON COLUMN QA_USER.CREATE_USER_ID IS'创建人id';
+
+COMMENT ON COLUMN QA_USER.CREATE_TIME IS'创建时间';
+
+COMMENT ON COLUMN QA_USER.MODIFY_TIME IS'修改时间';
+
+/*==============================================================*/
+/* Table: REPAIR_RECORD                                         */
+/*==============================================================*/
+CREATE TABLE REPAIR_RECORD
+(
+  ID                  NUMBER(20) DEFAULT NULL NOT NULL,
+  PROCESS_RECORD_ID NUMBER(11),
+  PRODUCT_ID        VARCHAR2(80),
+  BAD_CODE            VARCHAR2(80),
+  BAD_NAME            VARCHAR2(200),
+  BAD_TYPE            VARCHAR2(80),
+  BAD_RESON           VARCHAR2(80),
+  REPAIR              NUMBER DEFAULT 0,
+  USER_ID           VARCHAR2(80),
+  CREATE_TIME         DATE   DEFAULT SYSDATE,
+  MODIFY_TIME         DATE,
+  remark            VARCHAR2(100),
+  CONSTRAINT PK_REPAIR_RECORD PRIMARY KEY (ID)
+);
+
+COMMENT ON TABLE REPAIR_RECORD IS'维修内容';
+
+COMMENT ON COLUMN REPAIR_RECORD.ID IS'主键';
+
+COMMENT ON COLUMN REPAIR_RECORD.process_record_ID IS'测试记录ID';
+
+COMMENT ON COLUMN REPAIR_RECORD.product_id IS'产品Id';
+
+COMMENT ON COLUMN REPAIR_RECORD.BAD_CODE IS'不良代码';
+
+COMMENT ON COLUMN REPAIR_RECORD.BAD_NAME IS'不良代码名称';
+
+COMMENT ON COLUMN REPAIR_RECORD.BAD_TYPE IS'不良类型';
+
+COMMENT ON COLUMN REPAIR_RECORD.BAD_RESON IS'不良原因';
+
+COMMENT ON COLUMN REPAIR_RECORD.REPAIR IS'维修结果，0未维修1正常，2失败';
+
+COMMENT ON COLUMN REPAIR_RECORD.user_id IS'维修人工号';
+
+COMMENT ON COLUMN REPAIR_RECORD.CREATE_TIME IS'创建时间';
+
+COMMENT ON COLUMN REPAIR_RECORD.MODIFY_TIME IS'修改时间';
+
+COMMENT ON COLUMN REPAIR_RECORD.remark IS'备注';
+
+/*==============================================================*/
+/* Table: Role                                                */
+/*==============================================================*/
+CREATE TABLE QA_ROLE
+(
+  ID          NUMBER(11) NOT NULL,
+  CODE        VARCHAR2(80),
+  NAME        VARCHAR2(200),
+  VALID       NUMBER(1),
+  DESCRIPTION VARCHAR2(200),
+  CONSTRAINT PK_ROLE PRIMARY KEY (id),
+  CONSTRAINT AK_UQ_ROLE_ROLE UNIQUE (code)
+);
+
+COMMENT ON TABLE Role IS'角色';
+
+COMMENT ON COLUMN Role.ID IS'主键';
+
+COMMENT ON COLUMN Role.CODE IS'角色代码';
+
+COMMENT ON COLUMN Role.NAME IS'角色名称';
+
+COMMENT ON COLUMN Role.VALID IS'0有效，1无效';
+
+COMMENT ON COLUMN Role.DESCRIPTION IS'描述';
+
+/*==============================================================*/
+/* Table: SN_INFO                                               */
+/*==============================================================*/
+CREATE TABLE SN_INFO
+(
+  SN            VARCHAR2(80) NOT NULL,
+  TYPE          VARCHAR2(20),
+  CODE          VARCHAR2(20),
+  CATEGORY      VARCHAR2(20) NOT NULL,
+  YMD           VARCHAR2(20),
+  SERIAL_NUMBER VARCHAR2(20),
+  PRODUCT_ID    NUMBER(10),
+  CONSTRAINT AK_UQ_SN_INFO_SN_INFO UNIQUE (type, code)
+);
+
+COMMENT ON TABLE SN_INFO IS 'Sn信息，TYPE=CPSN,BLSN,BBSN';
+
+COMMENT ON COLUMN SN_INFO.SN IS'sn';
+
+COMMENT ON COLUMN SN_INFO.TYPE IS'编码类型';
+
+COMMENT ON COLUMN SN_INFO.CODE IS'编码';
+
+COMMENT ON COLUMN SN_INFO.CATEGORY IS'sn类别，chsn,blsn,bbsn';
+
+COMMENT ON COLUMN SN_INFO.YMD IS'年月日，yymmdd';
+
+COMMENT ON COLUMN SN_INFO.SERIAL_NUMBER IS'序列号，5位';
+COMMENT ON COLUMN SN_INFO.PRODUCT_ID IS'产品ID';
+
+/*==============================================================*/
+/* Table: SYS_LOG                                               */
+/*==============================================================*/
+CREATE TABLE SYS_LOG
+(
+  ID          NUMBER(20) NOT NULL,
+  user_id   NUMBER(11),
+  product_id number(10),
+  product_line_code VARCHAR2(20),
+  process_code VARCHAR2(20),
+  content   VARCHAR2(200),
+  CREATE_TIME DATE DEFAULT SYSDATE
+);
+COMMENT ON table SYS_LOG IS '站别日志';
+COMMENT ON COLUMN SYS_LOG.user_id IS '用户';
+COMMENT ON COLUMN SYS_LOG.product_id IS '产品ID';
+COMMENT ON COLUMN SYS_LOG.process_code IS '站别';
+COMMENT ON COLUMN SYS_LOG.content IS '内容';
+
+/*==============================================================*/
+/* Table: WORK_SHEET                                            */
+/*==============================================================*/
+CREATE TABLE WORK_SHEET
+(
+  ID                NUMBER(20) DEFAULT NULL NOT NULL,
+  SHEET_NO          VARCHAR2(80),
+  SHEET_PO          VARCHAR2(80),
+  PRODUCT_NO VARCHAR2(80),
+  PRODUCT_TYPE_CODE VARCHAR2(80),
+  TYPE              NUMBER DEFAULT 0,
+  OUTPUT_NUM        NUMBER(11),
+  START_TIME        DATE,
+  END_TIME          DATE,
+  VALID             NUMBER DEFAULT 0,
+  CREATE_TIME       DATE   DEFAULT SYSDATE,
+  CREATE_USER       VARCHAR2(80),
+  CONSTRAINT PK_WORK_SHEET PRIMARY KEY (ID),
+  CONSTRAINT AK_UQ_WORK_SHEET_WORK_SHE UNIQUE (SHEET_NO)
+);
+
+COMMENT ON TABLE WORK_SHEET IS
+'工单';
+
+COMMENT ON COLUMN WORK_SHEET.ID IS
+'主键';
+
+COMMENT ON COLUMN WORK_SHEET.SHEET_NO IS
+'工单号';
+
+COMMENT ON COLUMN WORK_SHEET.SHEET_PO IS
+'工单评审号';
+
+COMMENT ON COLUMN WORK_SHEET.PRODUCT_NO IS
+'产品编号';
+
+COMMENT ON COLUMN WORK_SHEET.PRODUCT_TYPE_CODE IS
+'产品类型';
+
+COMMENT ON COLUMN WORK_SHEET.TYPE IS
+'0，导入 1,自编';
+
+COMMENT ON COLUMN WORK_SHEET.OUTPUT_NUM IS
+'制单数量';
+
+COMMENT ON COLUMN WORK_SHEET.START_TIME IS
+'开始时间';
+
+COMMENT ON COLUMN WORK_SHEET.END_TIME IS
+'结束时间';
+
+COMMENT ON COLUMN WORK_SHEET.VALID IS
+'是否有效，0有效，1无效';
+
+COMMENT ON COLUMN WORK_SHEET.CREATE_TIME IS
+'创建时间';
+
+COMMENT ON COLUMN WORK_SHEET.CREATE_USER IS
+'创建人';
+
+/*==============================================================*/
+/* Table: preview                                             */
+/*==============================================================*/
+CREATE TABLE QA_PREVIEW
+(
+  id          NUMBER(11) NOT NULL,
+  code        VARCHAR2(80),
+  name        VARCHAR2(80),
+  uri         VARCHAR2(200),
+  valid       CHAR(10),
+  description VARCHAR2(200),
+  CONSTRAINT PK_PREVIEW PRIMARY KEY (id),
+  CONSTRAINT AK_UQ_PRIVIEW_CODE_PREVIEW UNIQUE (code)
+);
+
+COMMENT ON TABLE preview IS
+'权限';
+
+COMMENT ON COLUMN preview.code IS
+'代码';
+
+COMMENT ON COLUMN preview.name IS
+'名称';
+
+COMMENT ON COLUMN preview.uri IS
+'资源';
+
+COMMENT ON COLUMN preview.valid IS
+'0有效，1无效';
+
+COMMENT ON COLUMN preview.description IS
+'描述';
+
+/*==============================================================*/
+/* Table: role2preview                                        */
+/*==============================================================*/
+CREATE TABLE ROLE2PREVIEW
+(
+  role_code    VARCHAR2(80),
+  preview_code VARCHAR2(80)
+);
+
+/*==============================================================*/
+/* Table: user2Role                                           */
+/*==============================================================*/
+CREATE TABLE USER2ROLE
+(
+  user_id   NUMBER(11),
+  role_code VARCHAR2(80)
+);
+
+COMMENT ON TABLE USER2ROLE IS '用户角色';
+
+COMMENT ON COLUMN USER2ROLE.user_id IS '用户id';
+
+COMMENT ON COLUMN USER2ROLE.role_code IS '角色代码';
+
+
+/*==============================================================*/
+/* Table: BOM                                           */
+/*==============================================================*/
+CREATE TABLE BOM
+(
+  id                NUMBER(11),
+  product_no        varchar2(80),
+  product_type_code VARCHAR2(80),
+  type              NUMBER(1),
+  name              VARCHAR2(80),
+  code              VARCHAR2(80),
+  spec              VARCHAR2(400),
+  CONSTRAINT PK_BOM PRIMARY KEY (id)
+);
+
+COMMENT ON TABLE BOM IS 'BOM';
+COMMENT ON COLUMN BOM.id IS 'id';
+COMMENT ON COLUMN BOM.product_Type_Code IS '产品类型';
+COMMENT ON COLUMN BOM.type IS '类型，1说明数，2保修卡，3彩盒';
+COMMENT ON COLUMN BOM.name IS '名称';
+COMMENT ON COLUMN BOM.code IS '编码';
+COMMENT ON COLUMN BOM.Spec IS '规格';
+

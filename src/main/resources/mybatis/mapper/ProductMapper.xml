@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IProductDao">
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.Product">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="SHEET_PO" jdbcType="VARCHAR" property="sheetPo"/>
+        <result column="PRODUCT_NO" jdbcType="VARCHAR" property="productNo"/>
+        <result column="PRODUCT_TYPE_code" jdbcType="VARCHAR" property="productTypeCode"/>
+        <result column="CPSN" jdbcType="VARCHAR" property="cpsn"/>
+        <result column="BLSN" jdbcType="VARCHAR" property="blsn"/>
+        <result column="BBSN" jdbcType="VARCHAR" property="bbsn"/>
+        <result column="CGQSN" jdbcType="VARCHAR" property="cgqsn"/>
+        <result column="SMSSN" jdbcType="VARCHAR" property="smssn"/>
+        <result column="BXKSN" jdbcType="VARCHAR" property="bxksn"/>
+        <result column="CHSN" jdbcType="VARCHAR" property="chsn"/>
+        <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    ID, SHEET_PO,PRODUCT_NO,PRODUCT_TYPE_CODE, CPSN, BLSN, BBSN, CGQSN, SMSSN, BXKSN, CHSN, VALID,
+    CREATE_TIME, MODIFY_TIME
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.ProductGeneratedCriteria" resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from PRODUCT
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from PRODUCT
+        where ID = #{id,jdbcType=DECIMAL}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="Long">
+    delete from PRODUCT
+    where ID = #{id,jdbcType=DECIMAL}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.ProductGeneratedCriteria">
+        delete from PRODUCT
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.Product">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT PRODUCT_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into PRODUCT (ID,SHEET_PO,PRODUCT_NO, PRODUCT_TYPE_CODE, CPSN,
+        BLSN, BBSN, CGQSN,
+        SMSSN, BXKSN, CHSN,
+        VALID, CREATE_TIME, MODIFY_TIME)
+        values (#{id,jdbcType=BIGINT},#{sheetPo,jdbcType=VARCHAR},#{productNo,jdbcType=VARCHAR}, #{productTypeCode,jdbcType=VARCHAR}, #{cpsn,jdbcType=VARCHAR},
+        #{blsn,jdbcType=VARCHAR}, #{bbsn,jdbcType=VARCHAR}, #{cgqsn,jdbcType=VARCHAR},
+        #{smssn,jdbcType=VARCHAR}, #{bxksn,jdbcType=VARCHAR}, #{chsn,jdbcType=VARCHAR},
+        #{valid,jdbcType=DECIMAL}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.Product">
+        <selectKey keyProperty="id" order="BEFORE" resultType="Long">
+            SELECT PRODUCT_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into PRODUCT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="sheetPo != null">
+                SHEET_PO,
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_code,
+            </if>
+            <if test="cpsn != null">
+                CPSN,
+            </if>
+            <if test="blsn != null">
+                BLSN,
+            </if>
+            <if test="bbsn != null">
+                BBSN,
+            </if>
+            <if test="cgqsn != null">
+                CGQSN,
+            </if>
+            <if test="smssn != null">
+                SMSSN,
+            </if>
+            <if test="bxksn != null">
+                BXKSN,
+            </if>
+            <if test="chsn != null">
+                CHSN,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="sheetPo != null">
+                #{sheetPo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="cpsn != null">
+                #{cpsn,jdbcType=VARCHAR},
+            </if>
+            <if test="blsn != null">
+                #{blsn,jdbcType=VARCHAR},
+            </if>
+            <if test="bbsn != null">
+                #{bbsn,jdbcType=VARCHAR},
+            </if>
+            <if test="cgqsn != null">
+                #{cgqsn,jdbcType=VARCHAR},
+            </if>
+            <if test="smssn != null">
+                #{smssn,jdbcType=VARCHAR},
+            </if>
+            <if test="bxksn != null">
+                #{bxksn,jdbcType=VARCHAR},
+            </if>
+            <if test="chsn != null">
+                #{chsn,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.ProductGeneratedCriteria" resultType="Long">
+        select count(*) from PRODUCT
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update PRODUCT
+        <set>
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=DECIMAL},
+            </if>
+            <if test="record.sheetPo != null">
+                SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR},
+            </if>
+            <if test="record.productTypeCode != null">
+                PRODUCT_TYPE_code = #{record.productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.cpsn != null">
+                CPSN = #{record.cpsn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.blsn != null">
+                BLSN = #{record.blsn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.bbsn != null">
+                BBSN = #{record.bbsn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.cgqsn != null">
+                CGQSN = #{record.cgqsn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.smssn != null">
+                SMSSN = #{record.smssn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.bxksn != null">
+                BXKSN = #{record.bxksn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.chsn != null">
+                CHSN = #{record.chsn,jdbcType=VARCHAR},
+            </if>
+            <if test="record.valid != null">
+                VALID = #{record.valid,jdbcType=DECIMAL},
+            </if>
+            <if test="record.createTime != null">
+                CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="record.modifyTime != null">
+                MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update PRODUCT
+        set ID = #{record.id,jdbcType=DECIMAL},
+        SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR},
+        PRODUCT_TYPE_code = #{record.productTypeCode,jdbcType=VARCHAR},
+        CPSN = #{record.cpsn,jdbcType=VARCHAR},
+        BLSN = #{record.blsn,jdbcType=VARCHAR},
+        BBSN = #{record.bbsn,jdbcType=VARCHAR},
+        CGQSN = #{record.cgqsn,jdbcType=VARCHAR},
+        SMSSN = #{record.smssn,jdbcType=VARCHAR},
+        BXKSN = #{record.bxksn,jdbcType=VARCHAR},
+        CHSN = #{record.chsn,jdbcType=VARCHAR},
+        VALID = #{record.valid,jdbcType=DECIMAL},
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+        MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lifesense.quality.domain.Product">
+        update PRODUCT
+        <set>
+            <if test="sheetPo != null">
+                SHEET_PO = #{sheetPo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_code = #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="cpsn != null">
+                CPSN = #{cpsn,jdbcType=VARCHAR},
+            </if>
+            <if test="blsn != null">
+                BLSN = #{blsn,jdbcType=VARCHAR},
+            </if>
+            <if test="bbsn != null">
+                BBSN = #{bbsn,jdbcType=VARCHAR},
+            </if>
+            <if test="cgqsn != null">
+                CGQSN = #{cgqsn,jdbcType=VARCHAR},
+            </if>
+            <if test="smssn != null">
+                SMSSN = #{smssn,jdbcType=VARCHAR},
+            </if>
+            <if test="bxksn != null">
+                BXKSN = #{bxksn,jdbcType=VARCHAR},
+            </if>
+            <if test="chsn != null">
+                CHSN = #{chsn,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=DECIMAL}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lifesense.quality.domain.Product">
+    update PRODUCT
+    set SHEET_PO = #{sheetPo,jdbcType=VARCHAR},
+      PRODUCT_TYPE_code = #{productTypeCode,jdbcType=VARCHAR},
+      CPSN = #{cpsn,jdbcType=VARCHAR},
+      BLSN = #{blsn,jdbcType=VARCHAR},
+      BBSN = #{bbsn,jdbcType=VARCHAR},
+      CGQSN = #{cgqsn,jdbcType=VARCHAR},
+      SMSSN = #{smssn,jdbcType=VARCHAR},
+      BXKSN = #{bxksn,jdbcType=VARCHAR},
+      CHSN = #{chsn,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=DECIMAL},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=DECIMAL}
+  </update>
+    <select id="count" parameterType="com.lifesense.quality.domain.Product" resultType="java.lang.Integer">
+        select count(*)  from Product
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                and ID = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.sheetPo != null">
+                and SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productTypeCode != null">
+                and PRODUCT_TYPE_code = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.cpsn != null">
+                and CPSN = #{record.cpsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.blsn != null">
+                and BLSN = #{record.blsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.bbsn != null">
+                and BBSN = #{record.bbsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.cgqsn != null">
+                and CGQSN = #{record.cgqsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.smssn != null">
+                and SMSSN = #{record.smssn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.bxksn != null">
+                and BXKSN = #{record.bxksn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.chsn != null">
+                and CHSN = #{record.chsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.valid != null">
+                and VALID = #{record.valid,jdbcType=DECIMAL}
+            </if>
+            <if test="record.createTime != null">
+                and CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.modifyTime != null">
+                and MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.Product" resultType="com.lifesense.quality.domain.Product">
+        select
+        T1.ID as id, T1.SHEET_PO as sheetPo, T1.PRODUCT_TYPE_CODE as productTypeCode, T1.CPSN as cpsn,
+        T1.BLSN as blsn, T1.BBSN as bbsn, T1.CGQSN as cgqsn, T1.SMSSN as smssn, T1.BXKSN as bxksn, T1.CHSN as chsn, T1.VALID as valid,
+        T1.CREATE_TIME as createTime, T1.MODIFY_TIME as modifyTime,T2.name as productTypeName
+        from Product T1,PRODUCT_TYPE T2
+        <trim prefix="where" prefixOverrides="and | or">
+            and T1.PRODUCT_TYPE_CODE=T2.CODE
+            <if test="record.id != null">
+                and T1.ID = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.sheetPo != null">
+                and T1.SHEET_PO = #{record.sheetPo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productTypeCode != null">
+                and T1.PRODUCT_TYPE_code = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.cpsn != null">
+                and T1.CPSN = #{record.cpsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.blsn != null">
+                and T1.BLSN = #{record.blsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.bbsn != null">
+                and T1.BBSN = #{record.bbsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.cgqsn != null">
+                and T1.CGQSN = #{record.cgqsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.smssn != null">
+                and T1.SMSSN = #{record.smssn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.bxksn != null">
+                and T1.BXKSN = #{record.bxksn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.chsn != null">
+                and T1.CHSN = #{record.chsn,jdbcType=VARCHAR}
+            </if>
+            <if test="record.valid != null">
+                and T1.VALID = #{record.valid,jdbcType=DECIMAL}
+            </if>
+            <if test="record.createTime != null">
+                and T1.CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="record.modifyTime != null">
+                and T1.MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+    <update id="updateCPSN">
+    UPDATE PRODUCT SET CPSN=NULL,MODIFY_TIME=#{modifyTime} WHERE ID=#{id}
+    </update>
+</mapper>

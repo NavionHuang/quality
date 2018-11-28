@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lifesense.quality.dao.IBomDao">
+    <cache eviction="LRU" flushInterval="600000" size="1024" readOnly="true"/>
+    <resultMap id="BaseResultMap" type="com.lifesense.quality.domain.Bom">
+        <id column="ID" jdbcType="DECIMAL" property="id"/>
+        <result column="PRODUCT_NO" jdbcType="VARCHAR" property="productNo"/>
+        <result column="PRODUCT_TYPE_CODE" jdbcType="VARCHAR" property="productTypeCode"/>
+        <result column="TYPE" jdbcType="INTEGER" property="type"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="CODE" jdbcType="VARCHAR" property="code"/>
+        <result column="SPEC" jdbcType="VARCHAR" property="spec"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Update_By_Example_Where_Clause">
+        <where>
+            <foreach collection="example.oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+    ID,PRODUCT_NO, PRODUCT_TYPE_CODE,TYPE, NAME, CODE, SPEC
+  </sql>
+    <select id="selectByExample" parameterType="com.lifesense.quality.criteria.BomGeneratedCriteria"
+            resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List"/>
+        from BOM
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from BOM
+        where ID = #{id,jdbcType=DECIMAL}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from BOM
+    where ID = #{id,jdbcType=DECIMAL}
+  </delete>
+    <delete id="deleteByExample" parameterType="com.lifesense.quality.criteria.BomGeneratedCriteria">
+        delete from BOM
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.lifesense.quality.domain.Bom">
+        <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.Long">
+            SELECT BOM_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into BOM (ID,PRODUCT_NO,PRODUCT_TYPE_CODE, TYPE, NAME,
+        CODE, SPEC)
+        values (#{id,jdbcType=BIGINT},#{productNo,jdbcType=VARCHAR},#{productTypeCode,jdbcType=VARCHAR}, #{type,jdbcType=DECIMAL}, #{name,jdbcType=VARCHAR},
+        #{code,jdbcType=VARCHAR}, #{spec,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.lifesense.quality.domain.Bom">
+        <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.Long">
+            SELECT BOM_SEQ.NEXTVAL AS Id FROM DUAL
+        </selectKey>
+        insert into BOM
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="productNo != null">
+                PRODUCT_NO,
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_CODE,
+            </if>
+            <if test="type != null">
+                TYPE,
+            </if>
+            <if test="name != null">
+                NAME,
+            </if>
+            <if test="code != null">
+                CODE,
+            </if>
+            <if test="spec != null">
+                SPEC,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{ID,jdbcType=BIGINT},
+            </if>
+            <if test="productNo != null">
+                #{productNo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=DECIMAL},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="spec != null">
+                #{spec,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="countByExample" parameterType="com.lifesense.quality.criteria.BomGeneratedCriteria"
+            resultType="java.lang.Long">
+        select count(*) from BOM
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause"/>
+        </if>
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
+        update BOM
+        <set>
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=DECIMAL},
+            </if>
+            <if test="record.productTypeCode != null">
+                PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="record.type != null">
+                TYPE = #{record.type,jdbcType=DECIMAL},
+            </if>
+            <if test="record.name != null">
+                NAME = #{record.name,jdbcType=VARCHAR},
+            </if>
+            <if test="record.code != null">
+                CODE = #{record.code,jdbcType=VARCHAR},
+            </if>
+            <if test="record.spec != null">
+                SPEC = #{record.spec,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByExample" parameterType="map">
+        update BOM
+        set ID = #{record.id,jdbcType=DECIMAL},
+        PRODUCT_NO = #{record.productNo,jdbcType=VARCHAR},
+        PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR},
+        TYPE = #{record.type,jdbcType=DECIMAL},
+        NAME = #{record.name,jdbcType=VARCHAR},
+        CODE = #{record.code,jdbcType=VARCHAR},
+        SPEC = #{record.spec,jdbcType=VARCHAR}
+        <if test="_parameter != null">
+            <include refid="Update_By_Example_Where_Clause"/>
+        </if>
+    </update>
+    <update id="updateByPrimaryKeySelective" parameterType="com.lifesense.quality.domain.Bom">
+        update BOM
+        <set>
+            <if test="productNo != null">
+                PRODUCT_NO = #{productNo,jdbcType=VARCHAR},
+            </if>
+            <if test="productTypeCode != null">
+                PRODUCT_TYPE_CODE = #{productTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                TYPE = #{type,jdbcType=DECIMAL},
+            </if>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                CODE = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="spec != null">
+                SPEC = #{spec,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=DECIMAL}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.lifesense.quality.domain.Bom">
+    update BOM
+    set PRODUCT_TYPE_CODE = #{productTypeCode,jdbcType=VARCHAR},
+      TYPE = #{type,jdbcType=DECIMAL},
+      NAME = #{name,jdbcType=VARCHAR},
+      CODE = #{code,jdbcType=VARCHAR},
+      SPEC = #{spec,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=DECIMAL}
+  </update>
+
+    <select id="count" parameterType="com.lifesense.quality.domain.BadCode" resultType="java.lang.Integer">
+        select count(*)
+        from Bom
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.productNo != null">
+               and PRODUCT_NO = #{record.productNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.productTypeCode != null">
+               and PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.type != null">
+               and TYPE = #{record.type,jdbcType=DECIMAL}
+            </if>
+            <if test="record.name != null">
+               and NAME = #{record.name,jdbcType=VARCHAR}
+            </if>
+            <if test="record.code != null">
+               and CODE = #{record.code,jdbcType=VARCHAR}
+            </if>
+            <if test="record.spec != null">
+               and SPEC = #{record.spec,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <select id="select" parameterType="com.lifesense.quality.domain.Bom" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from Bom
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="record.id != null">
+                ID = #{record.id,jdbcType=DECIMAL}
+            </if>
+            <if test="record.productTypeCode != null and record.productTypeCode !=''">
+               and PRODUCT_TYPE_CODE = #{record.productTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="record.type != null">
+               and TYPE = #{record.type,jdbcType=DECIMAL}
+            </if>
+            <if test="record.name != null and record.name !=''">
+                and NAME = #{record.name,jdbcType=VARCHAR}
+            </if>
+            <if test="record.code != null and record.code != ''">
+               and CODE = #{record.code,jdbcType=VARCHAR}
+            </if>
+            <if test="record.spec != null">
+               and SPEC = #{record.spec,jdbcType=VARCHAR}
+            </if>
+        </trim>
+    </select>
+</mapper>
